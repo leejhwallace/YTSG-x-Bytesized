@@ -15,6 +15,8 @@ body{
     position: relative;
 }
 
+
+
 /* circles */
 .circle{
     position: absolute;
@@ -30,8 +32,6 @@ body{
     top: calc(100vh - 1150px);
     background: #f6dfb2;
 }
-
-
 
 
 .circle2{
@@ -50,22 +50,20 @@ body{
     background: #e8aa43;
 }
 
-
-/* Main title */
-.GET-STARTED{
+/* header */
+.create-account{
     position: absolute;
     left: 73px;
     top: 60px;
-    font-size: 110px;
-    font-weight: 800;
+    font-size: 117px;
+    font-weight: 700;
     line-height: 0.95;
     color: #000000;
     letter-spacing: 3px;
     z-index: 10;
 }
 
-
-.START-WITH{
+.personal-info{
     position: absolute;
     left: 75px;
     top: 155px;
@@ -75,36 +73,7 @@ body{
     z-index: 10;
 }
 
-.SIGN-IN{
-    position: absolute;
-    left: 244px;
-    top: 155px;
-    font-size: 34px;
-    font-weight: 800;
-    color: #111111;
-    z-index: 10;
-}
-
-.OR{
-    position: absolute;
-    left: 377px;
-    top: 155px;
-    font-size: 34px;
-    font-weight: 400;
-    color: #111111;
-    z-index: 10;
-}
-
-.SIGN-UP{
-    position: absolute;
-    left: 420px;
-    top: 155px;
-    font-size: 34px;
-    font-weight: 800;
-    color: #111111;
-    z-index: 10;
-}
-
+/* or lines*/
 
 .or-wrapper{
     position: absolute;
@@ -143,7 +112,7 @@ body{
     mix-blend-mode: multiply;
     opacity: 0.4;
     left: 73px;
-    top: 305px;
+    top: 335px;
 
 
 }
@@ -157,7 +126,7 @@ body{
     mix-blend-mode: multiply;
     opacity: 0.4;
     left: 73px;
-    top: 285px;
+    top: 315px;
     border: none;
     border-bottom: 2px solid gray;
     padding-top: 15px;
@@ -180,7 +149,7 @@ input::placeholder {
     mix-blend-mode: multiply;
     opacity: 0.4;
     left: -406px;
-    top: 400px;
+    top: 430px;
 
 
 }
@@ -194,7 +163,7 @@ input::placeholder {
     mix-blend-mode: multiply;
     opacity: 0.4;
     left: -385px;
-    top: 392px;
+    top: 422px;
     border: none;
     border-bottom: 2px solid gray;
     padding-top: 15px;
@@ -207,4 +176,6 @@ input::placeholder {
   font-size: 25px;
   font-family: 'Poppins', sans-serif;
 }
+
+
 
