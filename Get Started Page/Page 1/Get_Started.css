@@ -208,6 +208,20 @@ input::placeholder {
   font-family: 'Poppins', sans-serif;
 }
 
+#show-pw {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    z-index: 10;
+    mix-blend-mode: multiply;
+    opacity: 0.4;
+    left: -400px;
+    top: 390px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 
 /* Signup*/
 .No-Account{
