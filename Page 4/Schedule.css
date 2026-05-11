@@ -183,13 +183,11 @@ body {
     position: relative;
     overflow-y: auto;
     background:
-        repeating-linear-gradient(
-            to right,
+        repeating-linear-gradient(to right,
             transparent 0,
             transparent calc(100% / 14 - 1px),
             var(--grid-line) calc(100% / 14 - 1px),
-            var(--grid-line) calc(100% / 14)
-        );
+            var(--grid-line) calc(100% / 14));
 }
 
 .today-marker {
@@ -247,6 +245,144 @@ body {
     place-items: center;
     cursor: pointer;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+.editor-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 82px;
+    transform: translateY(110%);
+    transition: transform 0.28s ease, opacity 0.28s ease;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(239, 178, 71, 0.96);
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+    display: grid;
+    gap: 20px;
+    min-height: 320px;
+    z-index: 5;
+}
+
+.editor-sheet.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.editor-close,
+.editor-save {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    color: #2e1c0e;
+    font-size: 28px;
+    font-weight: 700;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.editor-tabs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex: 1;
+}
+
+.editor-tab {
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.editor-tab.active {
+    background: #cf512a;
+    color: #ffffff;
+}
+
+.editor-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    overflow-y: auto;
+    max-height: 400px;
+    padding-right: 8px;
+}
+
+.editor-column {
+    display: grid;
+    gap: 10px;
+}
+
+.editor-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.editor-col {
+    display: grid;
+    gap: 10px;
+}
+
+.editor-full {
+    grid-column: 1 / -1;
+}
+
+.editor-column-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.editor-field {
+    display: grid;
+    gap: 6px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.editor-field span {
+    font-weight: 600;
+}
+
+.editor-field input {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+    background: transparent;
+    color: #171717;
+    font: inherit;
+    padding: 8px 0;
+    outline: none;
+}
+
+.editor-field input::placeholder {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 900px) {
+    .editor-content {
+        grid-template-columns: 1fr;
+    }
 }
 
 .bottom-nav {
