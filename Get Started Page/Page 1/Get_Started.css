@@ -225,13 +225,14 @@ input::placeholder {
     border-radius: 100px;
     font-size: 33px;
     font-weight: 780;
-    left: 860px;
+    left: 890px;
     top: 450px;
     background-color: #CF512A;
     color: white;
     width: 270px;
     height: 46px;
-    border: none
+    border: none;
+    cursor: pointer;
 }
 
 
@@ -256,7 +257,9 @@ input::placeholder {
     color: #CF512A;
     width: 270px;
     height: 46px;
-    border: none
+    cursor: pointer;
+    border: none;
+
 }
 
 
