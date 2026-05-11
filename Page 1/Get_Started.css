@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body{
+body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -16,14 +16,14 @@ body{
 }
 
 /* circles */
-.circle{
+.circle {
     position: absolute;
     border-radius: 50%;
     pointer-events: none;
     box-shadow: inset 0 0 0 8px rgba(0, 0, 0, 0.012);
 }
 
-.circle1{
+.circle1 {
     width: 2500px;
     height: 2300px;
     left: -1130px;
@@ -34,7 +34,7 @@ body{
 
 
 
-.circle2{
+.circle2 {
     width: 1800px;
     height: 1800px;
     left: -600px;
@@ -42,7 +42,7 @@ body{
     background: #efc06b;
 }
 
-.circle3{
+.circle3 {
     width: 1300px;
     height: 1300px;
     left: -350px;
@@ -52,7 +52,7 @@ body{
 
 
 /* Main title */
-.GET-STARTED{
+.GET-STARTED {
     position: absolute;
     left: 73px;
     top: 60px;
@@ -65,7 +65,7 @@ body{
 }
 
 
-.START-WITH{
+.START-WITH {
     position: absolute;
     left: 75px;
     top: 155px;
@@ -75,7 +75,7 @@ body{
     z-index: 10;
 }
 
-.SIGN-IN{
+.SIGN-IN {
     position: absolute;
     left: 244px;
     top: 155px;
@@ -85,7 +85,7 @@ body{
     z-index: 10;
 }
 
-.OR{
+.OR {
     position: absolute;
     left: 377px;
     top: 155px;
@@ -95,7 +95,7 @@ body{
     z-index: 10;
 }
 
-.SIGN-UP{
+.SIGN-UP {
     position: absolute;
     left: 420px;
     top: 155px;
@@ -106,7 +106,7 @@ body{
 }
 
 
-.or-wrapper{
+.or-wrapper {
     position: absolute;
     left: 648px;
     top: 230px;
@@ -116,14 +116,14 @@ body{
     z-index: 10;
 }
 
-.or-line{
+.or-line {
     width: 1px;
     height: 280px;
     background: rgba(0, 0, 0, 0.15);
     transform: translateY(-30px);
 }
 
-.or_for_line{
+.or_for_line {
     font-size: 16px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.35);
@@ -132,99 +132,79 @@ body{
     transform: translateY(-30px);
 }
 
-/*email*/
-
-.email-logo {
-    width: 90px;
-    height: 60px;
-    margin-top: 40px;
-    position: relative;
-    z-index: 10;
-    mix-blend-mode: multiply;
-    opacity: 0.4;
+.form-container {
+    position: absolute;
     left: 73px;
-    top: 305px;
-
-
+    top: 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    z-index: 10;
 }
 
-.email-text {
-    width: 400px;
-    height: 52px;
-    margin-top: 40px;
-    position: relative;
-    z-index: 10;
-    mix-blend-mode: multiply;
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 500px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+    padding-bottom: 10px;
+}
+
+.icon {
     opacity: 0.4;
-    left: 73px;
-    top: 285px;
+    mix-blend-mode: multiply;
+    width: 30px;
+    height: 30px;
+}
+
+.email-icon,
+.password-icon {
+    width: 38px;
+    height: 38px;
+}
+
+.input-group input {
     border: none;
-    border-bottom: 2px solid gray;
-    padding-top: 15px;
-    font-size: 30px
-
-
-
-}
-input::placeholder {
-  font-size: 25px;
-}
-
-
-.password-logo {
-    width: 50px;
-    height: 50px;
-    margin-top: 40px;
-    position: relative;
-    z-index: 10;
-    mix-blend-mode: multiply;
+    outline: none;
+    background: transparent;
+    font-size: 25px;
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
     opacity: 0.4;
-    left: -406px;
-    top: 400px;
-
-
 }
 
-.password-text {
-    width: 400px;
-    height: 42px;
-    margin-top: 40px;
-    position: relative;
-    z-index: 10;
-    mix-blend-mode: multiply;
+.input-group input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 25px;
+}
+
+.show-pw {
     opacity: 0.4;
-    left: -385px;
-    top: 392px;
-    border: none;
-    border-bottom: 2px solid gray;
-    padding-top: 15px;
-    font-size: 30px
-
-
-
-}
-input::placeholder {
-  font-size: 25px;
-  font-family: 'Poppins', sans-serif;
-}
-
-#show-pw {
-    width: 50px;
-    height: 50px;
-    position: relative;
-    z-index: 10;
-    mix-blend-mode: multiply;
-    opacity: 0.4;
-    left: -400px;
-    top: 390px;
     background: none;
     border: none;
     cursor: pointer;
 }
 
+input::placeholder {
+    font-size: 25px;
+}
+
+
+input {
+    font-family: 'Poppins', sans-serif;
+}
+
+
+input::placeholder {
+    font-size: 25px;
+    font-family: 'Poppins', sans-serif;
+}
+
+
 
 /* Signup*/
-.No-Account{
+.No-Account {
     position: absolute;
     left: 810px;
     top: 380px;
@@ -234,7 +214,7 @@ input::placeholder {
     z-index: 10;
 }
 
-.sign-up-rounded-button{
+.sign-up-rounded-button {
     position: absolute;
     border-radius: 100px;
     font-size: 33px;
@@ -250,17 +230,16 @@ input::placeholder {
 }
 
 
-.forgot-password{
+.forgot-password {
     position: absolute;
     left: 400px;
     top: 500px;
     font-size: 20px;
     color: #111111;
     text-decoration: none
-
 }
 
-.sign-in-rounded-button{
+.sign-in-rounded-button {
     position: absolute;
     border-radius: 100px;
     font-size: 33px;
@@ -275,5 +254,3 @@ input::placeholder {
     border: none;
 
 }
-
-

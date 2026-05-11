@@ -190,7 +190,12 @@ body{
     cursor: pointer;
 }
 
-
+.show-pw {
+    opacity: 0.4;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
 
 .have-Account{
