@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="create_an_account.css">
+    <script src="create_an_account.js"></script>
+    <title>Create account</title>
+</head>
+
+<body>
+    <!-- Background circles -->
+    <div class="circle circle1"></div>
+    <div class="circle circle2"></div>
+    <div class="circle circle3"></div>
+
+    <!-- header -->
+    <p class="create-account">Create an account</p>
+    <p class="personal-info">Fill in your personal information</p>
+
+
+
+    <!-- Seperator -->
+    <div class="or-wrapper">
+        <div class="or-line"></div>
+        <div class="or_for_line">OR</div>
+        <div class="or-line"></div>
+    </div>
+
+    <!--Full name -- email -- password -- confirm-- button -->
+    <div class="form-container">
+
+        <div class="input-group">
+            <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" class="icon">
+            <input type="text" placeholder="Full Name">
+        </div>
+
+        <div class="input-group">
+            <img class="email-icon" src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="email icon">
+            <input type="text" placeholder="Email">
+        </div>
+
+        <div class="input-group">
+            <img class="icon password-icon" src="https://static.thenounproject.com/png/4020631-200.png">
+            <input type="password" class="password-text" placeholder="Password">
+            <button type="button" class="show-pw"><img class="eye-icon" src="../images/eye-close.png"></button>
+        </div>
+
+        <div class="input-group">
+            <img class="icon confirm-icon" src="https://static.thenounproject.com/png/4020631-200.png">
+            <input type="password" class="password-text" placeholder="Confirm Password">
+            <button type="button" class="show-pw"><img class="eye-icon" src="../images/eye-close.png"></button>
+        </div>
+
+
+    </div>
+    <button id="sign-up-button" class="sign-up-rounded-button">SIGN UP</button>
+
+    <p class="have-Account">Already have an account?</p>
+    <button id="sign-in-button" class="sign-in-rounded-button"
+        onclick="window.location.href='../Page 1/Get Started.html';">SIGN IN</button>
+
+
+
+</body>
+
+
+</html>

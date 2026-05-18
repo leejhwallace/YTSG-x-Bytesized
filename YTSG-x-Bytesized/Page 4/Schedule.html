@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule</title>
+    <script src="Schedule.js"></script>
+    <link rel="stylesheet" href="Schedule.css">
+</head>
+
+<body>
+    <main class="schedule-page">
+        <header class="top-bar">
+            <a href="../Page 3/Dashboard.html" class="back-button" aria-label="Back to dashboard"></a>
+            <h1>Schedule</h1>
+        </header>
+
+        <section class="toolbar" aria-label="Schedule controls">
+            <div class="month-picker">
+                <button class="month-arrow month-prev" aria-label="Previous month"></button>
+                <span>April</span>
+                <button class="month-arrow month-next" aria-label="Next month"></button>
+            </div>
+
+            <label class="search-box">
+                <span class="search-icon" aria-hidden="true"></span>
+                <input type="search" placeholder="Search Event/Project" aria-label="Search event or project">
+            </label>
+        </section>
+
+        <section class="calendar" aria-label="April schedule calendar">
+            <div class="day-strip">
+                <div class="day"><strong>01 Apr</strong><span>Wed</span></div>
+                <div class="day"><strong>02 Apr</strong><span>Thu</span></div>
+                <div class="day"><strong>03 Apr</strong><span>Fri</span></div>
+                <div class="day today-day"><strong>04 Apr</strong><span>Sat</span></div>
+                <div class="day"><strong>05 Apr</strong><span>Sun</span></div>
+                <div class="day"><strong>06 Apr</strong><span>Mon</span></div>
+                <div class="day"><strong>07 Apr</strong><span>Tue</span></div>
+                <div class="day"><strong>08 Apr</strong><span>Wed</span></div>
+                <div class="day"><strong>09 Apr</strong><span>Thu</span></div>
+                <div class="day"><strong>10 Apr</strong><span>Fri</span></div>
+                <div class="day"><strong>11 Apr</strong><span>Sat</span></div>
+                <div class="day"><strong>12 Apr</strong><span>Sun</span></div>
+                <div class="day"><strong>13 Apr</strong><span>Mon</span></div>
+                <div class="day"><strong>14 Apr</strong><span>Tue</span></div>
+            </div>
+
+            <div class="calendar-grid" aria-label="No current projects or events">
+                <div class="today-marker">
+                    <span>Today</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="editor-sheet" aria-hidden="true">
+            <div class="editor-header">
+                <button class="editor-close" aria-label="Close editor">×</button>
+                <div class="editor-tabs" role="tablist">
+                    <button class="editor-tab active" type="button" data-type="event" role="tab"
+                        aria-selected="true">Event</button>
+                    <button class="editor-tab" type="button" data-type="project" role="tab"
+                        aria-selected="false">Project</button>
+                </div>
+                <button class="editor-save" aria-label="Save item">✓</button>
+            </div>
+            <div class="editor-content">
+                <div class="editor-column editor-event">
+                    <div class="editor-column-title">Event</div>
+                    <div class="editor-row">
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Event Name</span>
+                                <input type="text" placeholder="Event Name">
+                            </label>
+                            <label class="editor-field">
+                                <span>Date</span>
+                                <input type="date">
+                            </label>
+                            <label class="editor-field">
+                                <span>Location</span>
+                                <input type="text" placeholder="Location">
+                            </label>
+                        </div>
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Event Description</span>
+                                <input type="text" placeholder="Event Description">
+                            </label>
+                            <label class="editor-field">
+                                <span>Number of Attendees</span>
+                                <input type="number" placeholder="0">
+                            </label>
+                            <label class="editor-field">
+                                <span>Event Category</span>
+                                <input type="text" placeholder="Event Category">
+                            </label>
+                        </div>
+                    </div>
+                    <label class="editor-field editor-full">
+                        <span>Additional Notes</span>
+                        <input type="text" placeholder="Additional Notes">
+                    </label>
+                </div>
+                <div class="editor-column editor-project">
+                    <div class="editor-column-title">Project</div>
+                    <div class="editor-row">
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Project Name</span>
+                                <input type="text" placeholder="Project Name">
+                            </label>
+                            <label class="editor-field">
+                                <span>Start Date</span>
+                                <input type="date">
+                            </label>
+                            <label class="editor-field">
+                                <span>Priority Level</span>
+                                <input type="text" placeholder="Priority Level">
+                            </label>
+                        </div>
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Project Description</span>
+                                <input type="text" placeholder="Project Description">
+                            </label>
+                            <label class="editor-field">
+                                <span>Task Status</span>
+                                <input type="text" placeholder="Task Status">
+                            </label>
+                            <label class="editor-field">
+                                <span>Project Leader</span>
+                                <input type="text" placeholder="Project Leader">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <button class="add-button" aria-label="Add project or event">+</button>
+
+        <nav class="bottom-nav" aria-label="Main navigation">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon nav-calendar"></span>
+                <span>Schedule</span>
+            </a>
+            <a href="../Page 3/Dashboard.html" class="nav-item">
+                <img class="nav-icon nav-image nav-data" src="https://static.thenounproject.com/png/1731722-200.png"
+                    alt="">
+                <span>Data</span>
+            </a>
+            <a href="#" class="nav-item">
+                <img class="nav-icon nav-image nav-settings"
+                    src="https://static.vecteezy.com/system/resources/previews/026/633/438/non_2x/settings-icon-symbol-design-illustration-vector.jpg"
+                    alt="">
+                <span>Settings</span>
+            </a>
+        </nav>
+    </main>
+
+</body>
+
+</html>
