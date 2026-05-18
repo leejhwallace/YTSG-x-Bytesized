@@ -11,4 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
             passwordField.type = "password"
         }
     }
+
+    let emailValue = document.getElementsByClassName('email-text')[0]
+    let passwordValue = document.getElementsByClassName('password-text')[0]
+    let signInButton = document.getElementById('sign-in-button')
+
+    signInButton.onclick = () => {
+        if (emailValue.value === "" || passwordValue.value === "") {
+            alert("Please fill in all fields.");
+        } else {
+            window.location.href = '../Page 3/Dashboard.html'
+        }
+    }
 })
