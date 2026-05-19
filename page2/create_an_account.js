@@ -5,10 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             if (!passwordField) return
             if (passwordField.type === 'password') {
-                eyeIcon.src = "./images/eye-open.png"
+                eyeIcon.src = "../images/eye-open.png"
                 passwordField.type = "text"
             } else {
-                eyeIcon.src = "./images/eye-close.png"
+                eyeIcon.src = "../images/eye-close.png"
                 passwordField.type = "password"
             }
         })
