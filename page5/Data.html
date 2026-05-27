@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data</title>
+    <link rel="stylesheet" href="Data.css">
+</head>
+<body>
+<main class="schedule-page">
+    <header class="top-bar">
+        <a href="../page3/Dashboard.html" class="back-button" aria-label="Back to dashboard"></a>
+        <h1>Data</h1>
+    </header>
+
+    <section class="search-section">
+        <label class="search-box">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input id="dataSearch" type="search" placeholder="Search Event/Project" aria-label="Search event or project">
+        </label>
+    </section>
+
+    <section class="data-view overview-view active" data-view="overview" aria-label="Overview data">
+        <div class="overview-charts">
+            <article class="panel chart-panel">
+                <button class="edit-button" type="button" aria-label="Edit"></button>
+                <h2>Event types with highest turnout</h2>
+                <div class="donut-wrap">
+                    <div class="overview-donut"></div>
+                    <div class="donut-legend">
+                        <p class="legend-workshop">Workshop – 70%</p>
+                        <p class="legend-outreach">Community Outreach – 10%</p>
+                    </div>
+                </div>
+            </article>
+            <article class="panel chart-panel">
+                <button class="edit-button" type="button" aria-label="Edit"></button>
+                <h2>Month-on-month event growth</h2>
+                <div class="bar-chart-wrap">
+                    <div class="bar-chart">
+                        <div class="bar" style="height:30%"></div>
+                        <div class="bar" style="height:45%"></div>
+                        <div class="bar" style="height:35%"></div>
+                        <div class="bar" style="height:60%"></div>
+                        <div class="bar" style="height:40%"></div>
+                        <div class="bar" style="height:75%"></div>
+                        <div class="bar" style="height:55%"></div>
+                        <div class="bar" style="height:80%"></div>
+                        <div class="bar" style="height:65%"></div>
+                        <div class="bar" style="height:90%"></div>
+                        <div class="bar" style="height:70%"></div>
+                        <div class="bar" style="height:85%"></div>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <article class="panel overview-table-panel">
+            <button class="edit-button" type="button" aria-label="Edit"></button>
+            <table class="overview-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>No. of participants</th>
+                        <th>Event type</th>
+                        <th>Most active volunteer</th>
+                        <th>Number of hrs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Event one<br><span class="sub">How to safely use devices</span></td>
+                        <td>13</td>
+                        <td>Workshop</td>
+                        <td>John Tan<br><span class="sub">Management</span></td>
+                        <td>20</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+    </section>
+
+    <section class="data-view project-view" data-view="project" aria-label="Project data">
+        <article class="panel project-hours">
+            <button class="edit-button" type="button" aria-label="Edit total amount spent"></button>
+            <h2>11 Hours 10min</h2>
+            <p class="subtitle">Total amount spent</p>
+            <table class="hours-table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Hours Spent</th>
+                        <th>Who Completed</th>
+                        <th>When Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Planning</td>
+                        <td>5 hours 7 min</td>
+                        <td>John Tan</td>
+                        <td>12/3/26</td>
+                    </tr>
+                    <tr>
+                        <td>Design</td>
+                        <td>4 hours 4 mins</td>
+                        <td>Greg Lim</td>
+                        <td>16/3/26</td>
+                    </tr>
+                    <tr>
+                        <td>Build</td>
+                        <td>1 hours 59 mins</td>
+                        <td>Lucy Kim</td>
+                        <td>21/3/26</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
+        <article class="panel project-reasons">
+            <button class="edit-button" type="button" aria-label="Edit reasons for delays"></button>
+            <h2>Reasons for delays</h2>
+        </article>
+    </section>
+
+    <section class="data-view event-view" data-view="event" aria-label="Event data">
+        <div class="event-small-stack">
+            <article class="panel feedback-panel">
+                <h2>Feedback ratings</h2>
+                <div class="rating-donut"></div>
+                <div class="rating-labels">
+                    <p class="rating-five">5 Stars – 40%</p>
+                    <p class="rating-four">4 Stars – 30%</p>
+                    <p class="rating-three">3 Stars – 20%</p>
+                    <p class="rating-two">2 Stars – 10%</p>
+                </div>
+            </article>
+            <article class="panel demographic-panel">
+                <h2>Demographic info</h2>
+                <div class="demographic-bars">
+                    <div class="demo-group children"><span>20%</span></div>
+                    <div class="demo-group teenagers"><span>80%</span><span>40%</span></div>
+                    <div class="demo-group adults"><span>5%</span><span>95%</span></div>
+                </div>
+                <div class="demo-axis">
+                    <span>children (1-12)</span>
+                    <span>teenagers (13-19)</span>
+                    <span>adults (20-59)</span>
+                </div>
+                <p class="demo-key female">First number – Female</p>
+                <p class="demo-key male">Second number – Male</p>
+            </article>
+        </div>
+
+        <article class="panel headcount-panel">
+            <h2>Volunteer headcount vs attendee headcount</h2>
+            <div class="headcount-row">
+                <span>Volunteer headcount</span>
+                <strong>130</strong>
+                <strong>100%</strong>
+            </div>
+            <div class="headcount-row">
+                <span>Attendee headcount</span>
+                <strong>95</strong>
+                <strong>73.1%</strong>
+            </div>
+            <div class="headcount-row">
+                <span>Difference</span>
+                <strong>35</strong>
+                <strong>26.9%</strong>
+            </div>
+        </article>
+
+        <article class="panel reach-panel">
+            <h2>Reach metrics</h2>
+            <div class="reach-content">
+                <div class="stacked-bar" aria-hidden="true">
+                    <span class="reach-word"></span>
+                    <span class="reach-website"></span>
+                    <span class="reach-social"></span>
+                </div>
+                <div class="reach-labels">
+                    <p class="word">Word of Mouth – 50%</p>
+                    <p class="website">Website – 105</p>
+                    <p class="social">Social Media – 40%</p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+        <a href="../page4/Schedule.html" class="nav-item">
+            <span class="nav-icon nav-calendar"></span>
+            <span>Schedule</span>
+        </a>
+        <a href="../page5/Data.html" class="nav-item active">
+            <img class="nav-icon nav-image nav-data" src="../images/data-icon-white.png" alt="Data">
+            <span>Data</span>
+        </a>
+        <a href="../page6/Settings.html" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Settings</span>
+        </a>
+    </nav>
+</main>
+<script src="Data.js"></script>
+</body>
+</html>

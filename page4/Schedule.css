@@ -122,7 +122,7 @@ body {
     opacity: 1;
 }
 
-.search-icon {
+.search-icon2{
     width: 34px;
     height: 34px;
     border: 4px solid #202020;
@@ -429,12 +429,13 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 82px;
+    height: 76px;
     background: var(--gold);
+    border-radius: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
-    padding: 0 230px;
+    padding: 0 116px;
 }
 
 .nav-item {
@@ -443,7 +444,7 @@ body {
     display: grid;
     justify-items: center;
     gap: 2px;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     line-height: 1;
 }
@@ -454,32 +455,9 @@ body {
 
 .nav-icon {
     position: relative;
-    width: 44px;
-    height: 44px;
-}
-
-.nav-calendar {
-    border: 5px solid currentColor;
-    border-radius: 6px;
-}
-
-.nav-calendar::before,
-.nav-calendar::after {
-    content: "";
-    position: absolute;
-    top: -11px;
-    width: 5px;
-    height: 18px;
-    background: currentColor;
-    border-radius: 999px;
-}
-
-.nav-calendar::before {
-    left: 10px;
-}
-
-.nav-calendar::after {
-    right: 10px;
+    display: block;
+    width: 43px;
+    height: 43px;
 }
 
 .nav-image {
@@ -489,16 +467,93 @@ body {
     background: transparent;
 }
 
+.nav-calendar {
+    border: 4px solid #ffffff;
+    border-radius: 6px;
+}
+
+.nav-calendar::before,
+.nav-calendar::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    width: 4px;
+    height: 17px;
+    background: #ffffff;
+    border-radius: 999px;
+}
+
+.nav-calendar::before {
+    left: 9px;
+}
+
+.nav-calendar::after {
+    right: 9px;
+}
+
 .nav-data {
     width: 48px;
     height: 48px;
-    transform: scale(1.08);
+    transform: scale(1.12);
 }
 
 .nav-settings {
-    width: 50px;
-    height: 50px;
-    transform: scale(1.08);
+    width: 52px;
+    height: 52px;
+    transform: scale(1.12);
+}
+
+@media (max-width: 900px) {
+    body {
+        overflow: auto;
+    }
+
+    .page {
+        height: auto;
+        min-height: 100vh;
+        padding-bottom: 88px;
+    }
+
+    .top-bar {
+        height: 70px;
+    }
+
+    .dashboard-title {
+        font-size: 34px;
+    }
+
+    .stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 12px;
+    }
+
+    .stat-card {
+        min-height: 125px;
+    }
+
+    .stat-title {
+        font-size: 15px;
+        white-space: normal;
+    }
+
+    .panel {
+        position: static;
+        margin: 16px 12px 0;
+    }
+
+    .active-panel,
+    .event-panel {
+        height: auto;
+        min-height: 210px;
+    }
+
+    .project-list {
+        padding: 24px;
+    }
+
+    .bottom-nav {
+        padding: 0 24px;
+    }
 }
 
 @media (max-width: 900px) {
