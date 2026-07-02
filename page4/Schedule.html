@@ -25,7 +25,7 @@
 
             <label class="search-box">
                 <span class="search-icon" aria-hidden="true"></span>
-                <input type="search" placeholder="Search Event/Project" aria-label="Search event or project">
+                <input type="search" aria-label="Search event or project">
             </label>
         </section>
 
@@ -56,35 +56,35 @@
                         <div class="editor-col">
                             <label class="editor-field">
                                 <span>Event Name</span>
-                                <input type="text" placeholder="Event Name">
+                                <input type="text" data-field="name">
                             </label>
                             <label class="editor-field">
                                 <span>Date</span>
-                                <input type="date">
+                                <input type="date" data-field="date">
                             </label>
                             <label class="editor-field">
                                 <span>Location</span>
-                                <input type="text" placeholder="Location">
+                                <input type="text" data-field="location">
                             </label>
                         </div>
                         <div class="editor-col">
                             <label class="editor-field">
                                 <span>Event Description</span>
-                                <input type="text" placeholder="Event Description">
+                                <input type="text" data-field="description">
                             </label>
                             <label class="editor-field">
                                 <span>Number of Attendees</span>
-                                <input type="number" placeholder="0">
+                                <input type="number" data-field="attendees">
                             </label>
                             <label class="editor-field">
                                 <span>Event Category</span>
-                                <input type="text" placeholder="Event Category">
+                                <input type="text" data-field="category">
                             </label>
                         </div>
                     </div>
                     <label class="editor-field editor-full">
                         <span>Additional Notes</span>
-                        <input type="text" placeholder="Additional Notes">
+                        <input type="text" data-field="notes">
                     </label>
                 </div>
                 <div class="editor-column editor-project">
@@ -93,37 +93,37 @@
                         <div class="editor-col">
                             <label class="editor-field">
                                 <span>Project Name</span>
-                                <input type="text" placeholder="Project Name">
+                                <input type="text" data-field="name">
                             </label>
                             <label class="editor-field">
                                 <span>Date Start</span>
-                                <input type="text" placeholder="DD/MM/YYYY">
+                                <input type="date" data-field="startDate">
                             </label>
                             <label class="editor-field">
                                 <span>Project Lead</span>
-                                <input type="text" placeholder="Project Lead">
+                                <input type="text" data-field="lead">
                             </label>
                             <label class="editor-field">
                                 <span>Task Status</span>
-                                <input type="text" placeholder="Task Status">
+                                <input type="text" data-field="status">
                             </label>
                         </div>
                         <div class="editor-col">
                             <label class="editor-field">
                                 <span>Project Description</span>
-                                <input type="text" placeholder="Project Description">
+                                <input type="text" data-field="description">
                             </label>
                             <label class="editor-field">
                                 <span>Date End</span>
-                                <input type="text" placeholder="DD/MM/YYYY">
+                                <input type="date" data-field="endDate">
                             </label>
                             <label class="editor-field">
                                 <span>Priority Level</span>
-                                <input type="text" placeholder="Priority Level">
+                                <input type="text" data-field="priority">
                             </label>
                             <label class="editor-field">
                                 <span>Assign to</span>
-                                <input type="text" placeholder="Assign to">
+                                <input type="text" data-field="assignee">
                             </label>
                         </div>
                     </div>
@@ -144,8 +144,9 @@
             </a>
             <a href="../page6/Settings.html" class="nav-item">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
                 <span>Settings</span>
             </a>
