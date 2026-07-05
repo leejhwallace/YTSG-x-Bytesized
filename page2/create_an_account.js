@@ -52,11 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('SignUp response:', signData, signError)
             if (signError) throw signError
 
-            // Optionally insert a profile row into a table (e.g., 'users')
-            // NOTE: Your table must allow inserts from the client (RLS policy) or use a backend.
+            // Insert a profile row into the users table, including password as a temporary fix
+            // NOTE: this is insecure; do not keep raw passwords in your table long-term.
             const userId = signData.user ? signData.user.id : null
             if (userId) {
-                const { data: insertData, error: insertError } = await supabaseClient.from('users').insert([{ id: userId, full_name: nameValue.value, email: emailValue.value }])
+                const { data: insertData, error: insertError } = await supabaseClient.from('users').insert([{ id: userId, full_name: nameValue.value, email: emailValue.value, password: passwordValue.value }])
                 console.log('Profile insert response:', insertData, insertError)
                 if (insertError) {
                     console.error('Profile insert failed:', insertError)
