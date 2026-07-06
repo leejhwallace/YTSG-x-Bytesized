@@ -8,90 +8,91 @@
 </head>
 <body>
 <main class="schedule-page">
+    <!-- TOP BAR -->
     <header class="top-bar">
-        <a href="../page3/Dashboard.html" class="back-button" aria-label="Back to dashboard"></a>
+        <a href="../page3/Dashboard.html" class="back-button" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </a>
         <h1>Data</h1>
     </header>
 
+    <!-- SEARCH BAR -->
     <section class="search-section">
         <label class="search-box">
-            <span class="search-icon" aria-hidden="true"></span>
-            <input id="dataSearch" type="search" placeholder="Search Event/Project" aria-label="Search event or project">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input id="dataSearch" type="search" placeholder="Search Event/Project" aria-label="Search event or project" autocomplete="off">
         </label>
     </section>
 
-    <!-- ═══ VIEW 1 — OVERVIEW (default, empty search) ═══ -->
+    <!-- VIEW 1: OVERVIEW -->
     <section class="data-view overview-view active" data-view="overview" aria-label="Overview data">
         <div class="overview-top-row">
-            <article class="panel chart-panel donut-panel">
-                <div class="chart-title-bar">Event types with highest turnout</div>
-                <div class="donut-wrap">
+            <article class="panel donut-panel">
+                <h3 class="panel-title-white">Event types with highest turnout</h3>
+                <div class="donut-container">
                     <div class="overview-donut"></div>
-                    <div class="donut-legend">
-                        <p class="legend-workshop">Workshop ~ 30%</p>
-                        <p class="legend-outreach">Community<br>Outreach ~ 50%</p>
-                        <p class="legend-fundraiser">Fundraiser ~ 20%</p>
+                    <div class="overview-donut-text">
+                        <span class="text-blue">Workshop - 30%</span><br>
+                        <span class="text-orange">Community<br>Outreach - 50%</span><br>
+                        <span class="text-yellow">Fundraiser - 20%</span>
                     </div>
                 </div>
             </article>
-            <article class="panel chart-panel bar-panel">
-                <div class="chart-title-bar">Month-on-month event growth</div>
+            <article class="panel bar-panel">
+                <h3 class="panel-title-white">Month-on-month event growth</h3>
                 <div class="bar-chart-wrap">
                     <div class="bar-chart">
-                        <div class="bar" style="height:30%"></div>
-                        <div class="bar" style="height:50%"></div>
-                        <div class="bar" style="height:35%"></div>
-                        <div class="bar" style="height:60%"></div>
+                        <div class="bar" style="height:25%"></div><div class="bar" style="height:35%"></div><div class="bar" style="height:30%"></div>
+                        <div class="bar" style="height:65%"></div><div class="bar" style="height:25%"></div><div class="bar" style="height:45%"></div>
+                        <div class="bar" style="height:35%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:85%"></div>
+                        <div class="bar" style="height:35%"></div><div class="bar" style="height:25%"></div><div class="bar" style="height:45%"></div>
+                        <div class="bar" style="height:20%"></div><div class="bar" style="height:55%"></div><div class="bar" style="height:30%"></div>
+                        <div class="bar" style="height:45%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:35%"></div>
+                        <div class="bar" style="height:25%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:20%"></div>
+                        <div class="bar" style="height:45%"></div><div class="bar" style="height:25%"></div><div class="bar" style="height:35%"></div>
+                        <div class="bar" style="height:85%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:20%"></div>
+                        <div class="bar" style="height:40%"></div><div class="bar" style="height:20%"></div><div class="bar" style="height:65%"></div>
                         <div class="bar" style="height:45%"></div>
-                        <div class="bar" style="height:75%"></div>
-                        <div class="bar" style="height:55%"></div>
-                        <div class="bar" style="height:80%"></div>
-                        <div class="bar" style="height:65%"></div>
-                        <div class="bar" style="height:90%"></div>
-                        <div class="bar" style="height:70%"></div>
-                        <div class="bar" style="height:45%"></div>
-                        <div class="bar" style="height:60%"></div>
-                        <div class="bar" style="height:50%"></div>
-                        <div class="bar" style="height:85%"></div>
-                        <div class="bar" style="height:40%"></div>
-                        <div class="bar" style="height:70%"></div>
-                        <div class="bar" style="height:55%"></div>
                     </div>
-                    <div class="bar-chart-axis"></div>
                 </div>
             </article>
         </div>
         <div class="overview-bottom-row">
-            <article class="panel overview-table-panel">
-                <table class="overview-table">
+            <article class="panel table-panel">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Event</th>
-                            <th>No. of participants</th>
-                            <th>Event type</th>
+                            <th class="center-text">No. of participants</th>
+                            <th class="center-text">Event type</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Event one<br><span class="sub">How to safely use devices</span></td>
-                            <td>12</td>
-                            <td>Workshop</td>
+                            <td><strong>Event one</strong><span class="sub">How to safely use devices</span></td>
+                            <td class="center-text"><strong>12</strong></td>
+                            <td class="center-text"><strong>Workshop</strong></td>
                         </tr>
                     </tbody>
                 </table>
             </article>
-            <article class="panel volunteer-panel">
-                <table class="volunteer-table">
+            <article class="panel table-panel">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Most active volunteer</th>
-                            <th>Number of hrs</th>
+                            <th class="center-text">Number of hrs</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>John Tan<br><span class="sub">Management</span></td>
-                            <td>30</td>
+                            <td><strong>John Tan</strong><span class="sub">Management</span></td>
+                            <td class="center-text"><strong>30</strong></td>
                         </tr>
                     </tbody>
                 </table>
@@ -99,160 +100,176 @@
         </div>
     </section>
 
-    <!-- ═══ VIEW 2 — PROJECT VIEW ═══ -->
+    <!-- VIEW 2: PROJECT VIEW -->
     <section class="data-view project-view" data-view="project" aria-label="Project data">
         <article class="panel project-hours">
-            <button class="edit-button" type="button" aria-label="Edit total hours spent">✏️</button>
-            <div class="project-hours-header">
+            <button class="edit-button" type="button" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </button>
+            <div class="project-header">
                 <h2>11 Hours 10min</h2>
-                <p class="subtitle">Total amount spent</p>
+                <p>Total amount spent</p>
             </div>
-            <table class="hours-table">
+            <table class="data-table project-table">
                 <thead>
                     <tr>
                         <th>Task</th>
-                        <th>Hours Spent</th>
-                        <th>Who Completed</th>
-                        <th>When Completed</th>
+                        <th class="center-text">Hours Spent</th>
+                        <th class="center-text">Who<br>Completed</th>
+                        <th class="center-text">When<br>Completed</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>Planning</td>
-                        <td>5 hours 7 min</td>
-                        <td>John Tan</td>
-                        <td>12/3/26</td>
+                        <td class="center-text">5 hours 7 min</td>
+                        <td class="center-text">John Tan</td>
+                        <td class="center-text">12/3/26</td>
                     </tr>
                     <tr>
                         <td>Design</td>
-                        <td>4 hours 4 mins</td>
-                        <td>Greg Lim</td>
-                        <td>16/3/26</td>
+                        <td class="center-text">4 hours 4 mins</td>
+                        <td class="center-text">Greg Lim</td>
+                        <td class="center-text">16/3/26</td>
                     </tr>
                     <tr>
                         <td>Build</td>
-                        <td>1 hours 59 mins</td>
-                        <td>Lucy Kim</td>
-                        <td>21/3/26</td>
+                        <td class="center-text">1 hours 59 mins</td>
+                        <td class="center-text">Lucy Kim</td>
+                        <td class="center-text">21/3/26</td>
                     </tr>
                 </tbody>
             </table>
         </article>
         <article class="panel project-reasons">
-            <button class="edit-button" type="button" aria-label="Edit reasons for delays">✏️</button>
-            <h2>Reasons for delays</h2>
+            <button class="edit-button" type="button" aria-label="Edit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </button>
+            <h2 class="reasons-title">Reasons for delays</h2>
         </article>
     </section>
 
-    <!-- ═══ VIEW 3 — EVENT VIEW ═══ -->
+    <!-- VIEW 3: EVENT VIEW -->
     <section class="data-view event-view" data-view="event" aria-label="Event data">
-        <div class="event-left-col">
-            <article class="panel feedback-panel">
-                <div class="feedback-title-bar">Feedback ratings</div>
-                <div class="feedback-content">
-                    <div class="rating-donut"></div>
-                    <div class="rating-labels">
-                        <p class="rating-five">5 Stars ~ 40%</p>
-                        <p class="rating-four">4 Stars ~ 30%</p>
-                        <p class="rating-three">3 Stars ~ 30%</p>
-                        <p class="rating-two">2 Stars ~ 10%</p>
+        <div class="event-col">
+            <article class="panel">
+                <h3 class="panel-title-white center-text">Feedback ratings</h3>
+                <div class="donut-container">
+                    <div class="feedback-donut"></div>
+                    <div class="event-donut-text">
+                        <span class="text-orange">5 Stars - 40%</span><br>
+                        <span class="text-blue">4 Stars - 30%</span><br>
+                        <span class="text-yellow">3 Stars - 20%</span><br>
+                        <span class="text-green">2 Stars - 10%</span>
                     </div>
                 </div>
             </article>
-            <article class="panel demographic-panel">
-                <div class="demo-title-bar">Demographic info</div>
-                <div class="demo-content">
+            <article class="panel">
+                <h3 class="panel-title-white center-text">Demographic info</h3>
+                <div class="demographic-content">
                     <div class="demographic-bars">
                         <div class="demo-col">
-                            <div class="demo-group children">
-                                <span class="demo-seg seg-orange">20%</span>
-                                <span class="demo-seg seg-yellow">80%</span>
+                            <div class="demo-group" style="height: 65px;">
+                                <span class="bg-orange" style="flex: 20">20%</span>
+                                <span class="bg-yellow" style="flex: 80">80%</span>
                             </div>
                             <span class="demo-label">children (3-12)</span>
                         </div>
                         <div class="demo-col">
-                            <div class="demo-group teenagers">
-                                <span class="demo-seg seg-orange">60%</span>
-                                <span class="demo-seg seg-yellow">40%</span>
+                            <div class="demo-group" style="height: 95px;">
+                                <span class="bg-orange" style="flex: 60">60%</span>
+                                <span class="bg-yellow" style="flex: 40">40%</span>
                             </div>
                             <span class="demo-label">teenagers (13-19)</span>
                         </div>
                         <div class="demo-col">
-                            <div class="demo-group adults">
-                                <span class="demo-seg seg-orange">5%</span>
-                                <span class="demo-seg seg-yellow">95%</span>
+                            <div class="demo-group" style="height: 40px;">
+                                <span class="bg-orange" style="flex: 5">5%</span>
+                                <span class="bg-yellow" style="flex: 95">95%</span>
                             </div>
                             <span class="demo-label">adults (20-39)</span>
                         </div>
                     </div>
-                    <div class="demo-key-row">
-                        <p class="demo-key first-timer">First timers ~ 28.33%</p>
-                        <p class="demo-key returning">Returning ~ 71.67%</p>
+                    <div class="demo-key">
+                        <span class="text-orange">First timers - 28.33%</span>
+                        <span class="text-yellow">Returning - 71.67%</span>
                     </div>
                 </div>
             </article>
         </div>
-
-        <article class="panel headcount-panel">
-            <h2>Volunteer headcount vs attendee headcount</h2>
-            <div class="headcount-table">
-                <div class="headcount-row">
-                    <span class="hc-label">Volunteer headcount</span>
-                    <strong class="hc-num">130</strong>
-                    <strong class="hc-pct">100%</strong>
+        
+        <article class="panel middle-panel">
+            <h2 class="large-title-black">Volunteer<br>headcount vs<br>attendee<br>headcount</h2>
+            <div class="headcount-grid">
+                <div class="hc-row">
+                    <span class="hc-label">Volunteer<br>headcount</span>
+                    <span class="hc-num">130</span>
                 </div>
-                <div class="headcount-row">
-                    <span class="hc-label">attendee headcount</span>
-                    <strong class="hc-num">95</strong>
-                    <strong class="hc-pct">73.1%</strong>
+                <div class="hc-row">
+                    <span class="hc-label">attendee<br>headcount</span>
+                    <span class="hc-num">95</span>
                 </div>
-                <div class="headcount-row">
+                <div class="hc-row">
                     <span class="hc-label">Difference</span>
-                    <strong class="hc-num">35</strong>
-                    <strong class="hc-pct">26.9%</strong>
+                    <span class="hc-num">35</span>
                 </div>
             </div>
         </article>
 
-        <article class="panel reach-panel">
-            <h2>Reach metrics</h2>
+        <article class="panel right-panel">
+            <h2 class="reach-title">Reach metrics</h2>
             <div class="reach-content">
-                <div class="stacked-bar" aria-hidden="true">
-                    <span class="reach-word"></span>
-                    <span class="reach-website"></span>
-                    <span class="reach-social"></span>
+                <div class="reach-stacked-bar">
+                    <div class="bg-yellow" style="flex: 50"></div>
+                    <div class="bg-orange" style="flex: 10"></div>
+                    <div class="bg-blue" style="flex: 40"></div>
                 </div>
                 <div class="reach-labels">
-                    <p class="word">Word of Mouth ~ 50%</p>
-                    <p class="website">Website ~ 105</p>
-                    <p class="social">Social Media ~ 40%</p>
+                    <span class="text-yellow">Word of<br>Mouth -<br>50%</span>
+                    <span class="text-orange">Website -<br>10%</span>
+                    <span class="text-blue">Social<br>Media -<br>40%</span>
                 </div>
             </div>
         </article>
     </section>
 
-    <!-- ═══ NO RESULTS STATE ═══ -->
-    <section class="data-view no-results-view" data-view="none" aria-label="No results">
+    <!-- NO RESULTS STATE -->
+    <section class="data-view no-results-view" data-view="none">
         <div class="no-results-content">
-            <div class="no-results-icon">🔍</div>
             <h2>No results found</h2>
             <p>Try searching for a valid event or project name.</p>
         </div>
     </section>
 
-    <nav class="bottom-nav" aria-label="Main navigation">
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
         <a href="../page4/Schedule.html" class="nav-item">
-            <span class="nav-icon nav-calendar"></span>
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
             <span>Schedule</span>
         </a>
         <a href="../page5/Data.html" class="nav-item active">
-            <img class="nav-icon nav-image nav-data" src="../images/data-icon-white.png" alt="Data">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
             <span>Data</span>
         </a>
         <a href="../page6/Settings.html" class="nav-item">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
             <span>Settings</span>
         </a>

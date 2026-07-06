@@ -2,42 +2,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('dataSearch');
     const views = document.querySelectorAll('.data-view');
 
-    /* ── Sample data for matching ── */
-    const projects = ['project 1', 'project 2', 'project 3'];
-    const events   = ['event 1', 'event 2', 'event 3',
-                      'event one', 'event two', 'event three'];
+    // Valid search keywords mapped to the views based on the mockup
+    const projects = ['project', 'project 1'];
+    const events   = ['event', 'event 1'];
 
-    /**
-     * Determine which view to show based on search input.
-     *  - Empty  → overview
-     *  - Matches a project name → project
-     *  - Matches an event name  → event
-     *  - No match → no-results
-     */
     const setView = () => {
-        const raw   = searchInput.value.trim();
+        const raw = searchInput.value.trim();
         const value = raw.toLowerCase();
-
-        let target = 'overview';                       // default
+        
+        let target = 'overview';
 
         if (value.length > 0) {
-            const isProject = projects.some(p => p.includes(value) || value.includes(p));
-            const isEvent   = events.some(e => e.includes(value) || value.includes(e));
+            // Evaluates instantly if the user starts typing exactly what's expected
+            const isProject = projects.some(p => p.startsWith(value));
+            const isEvent = events.some(e => e.startsWith(value));
 
             if (isProject) {
                 target = 'project';
             } else if (isEvent) {
                 target = 'event';
             } else {
-                // If the search contains "project" keyword, assume project
-                if (value.includes('project')) {
-                    target = 'project';
-                } else if (value.includes('event')) {
-                    target = 'event';
-                } else {
-                    target = 'none';                   // no results
-                }
+                target = 'none'; // Fallback for invalid searches
             }
+        } else {
+            target = 'overview'; // Default home state
         }
 
         views.forEach(view => {
@@ -47,6 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', setView);
 
-    /* Run once on load — empty search shows overview */
-    setView();
+    // Initial check on load
+    setView(); 
 });
