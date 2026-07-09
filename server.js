@@ -14,7 +14,7 @@ app.use(express.static('.'));
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || "https://txfditoxxdjigplckjcc.supabase.co";
-const supabaseKey = process.env.SUPABASE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4ZmRpdG94eGRqaWdwbGNramNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc1MTkyMjYsImV4cCI6MjAzMzA5OTIyNn0.rKfmfJOXnN-EKJnZhJ9HfKk_BbNqXhP7d0P1eJJqVmE";
+const supabaseKey = process.env.SUPABASE_KEY || "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // Signup endpoint
