@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         createAccountButton.textContent = 'Creating...'
 
         try {
+            // Hash password using bcryptjs
+            const hashedPassword = await bcryptjs.hash(passwordValue.value, 10)
+
             // Sign up the user with Supabase Auth
             const { data: signData, error: signError } = await supabaseClient.auth.signUp({
                 email: emailValue.value,
@@ -52,11 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('SignUp response:', signData, signError)
             if (signError) throw signError
 
-            // Insert a profile row into the users table, including password as a temporary fix
-            // NOTE: this is insecure; do not keep raw passwords in your table long-term.
+            // Insert a profile row into the users table with hashed password
             const userId = signData.user ? signData.user.id : null
             if (userId) {
-                const { data: insertData, error: insertError } = await supabaseClient.from('user-log-in-info').insert([{ id: userId, full_name: nameValue.value, email: emailValue.value, password: passwordValue.value }])
+                const { data: insertData, error: insertError } = await supabaseClient.from('user-log-in-info').insert([{ id: userId, full_name: nameValue.value, email: emailValue.value, password: hashedPassword }])
                 console.log('Profile insert response:', insertData, insertError)
                 if (insertError) {
                     console.error('Profile insert failed:', insertError)
