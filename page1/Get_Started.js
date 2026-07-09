@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = users[0]
 
             // Compare hashed password using bcryptjs
-            const passwordMatch = await dcodeIO.bcrypt.compare(passwordValue.value, user.password)
+            const passwordMatch = await bcryptjs.compare(passwordValue.value, user.password)
 
             if (!passwordMatch) {
                 alert('Invalid email or password.');
