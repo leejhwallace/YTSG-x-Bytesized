@@ -1,4 +1,4 @@
-# wrangler files
+
 .wrangler
 .dev.vars*
 !.dev.vars.example
@@ -6,3 +6,9 @@
 !.env.example
 .DS_Store
 .idea/
+node_modules/
+npm-debug.log
+npm-error.log
+*.log
+.vscode/
+.npm

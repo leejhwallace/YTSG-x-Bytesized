@@ -35,45 +35,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return
         }
 
-        if (!supabaseClient) {
-            alert('Supabase is not configured. Set `window.SUPABASE_URL` and `window.SUPABASE_ANON_KEY` in the HTML.');
-            return
-        }
-
         createAccountButton.disabled = true
         createAccountButton.textContent = 'Creating...'
 
         try {
-            // Hash password using bcryptjs
-            const hashedPassword = await bcryptjs.hash(passwordValue.value, 10)
-
-            // Sign up the user with Supabase Auth
-            const { data: signData, error: signError } = await supabaseClient.auth.signUp({
-                email: emailValue.value,
-                password: passwordValue.value
+            // Call backend signup endpoint
+            const response = await fetch('http://localhost:3000/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name: nameValue.value,
+                    email: emailValue.value,
+                    password: passwordValue.value
+                })
             })
-            console.log('SignUp response:', signData, signError)
-            if (signError) throw signError
 
-            // Insert a profile row into the users table with hashed password
-            const userId = signData.user ? signData.user.id : null
-            if (userId) {
-                const { data: insertData, error: insertError } = await supabaseClient.from('user-log-in-info').insert([{ id: userId, full_name: nameValue.value, email: emailValue.value, password: hashedPassword }])
-                console.log('Profile insert response:', insertData, insertError)
-                if (insertError) {
-                    console.error('Profile insert failed:', insertError)
-                    alert('Account created, but profile insert failed. Check console for details.')
-                    createAccountButton.disabled = false
-                    createAccountButton.textContent = 'SIGN UP'
-                    return
-                }
+            const data = await response.json()
+
+            if (!response.ok) {
+                alert('Signup failed: ' + data.error)
+                createAccountButton.disabled = false
+                createAccountButton.textContent = 'SIGN UP'
+                return
             }
 
-            // On success, redirect to dashboard (or show confirmation)
+            // On success, redirect to dashboard
             window.location.href = '../page3/Dashboard.html'
         } catch (err) {
             console.error(err)
-            alert('Signup failed: ' + (err.message || JSON.stringify(err)))
+            alert('Signup failed: ' + err.message)
             createAccountButton.disabled = false
             createAccountButton.textContent = 'SIGN UP'
         }
