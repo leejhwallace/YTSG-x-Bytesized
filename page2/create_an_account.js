@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Hash password using bcryptjs
-            const hashedPassword = await bcryptjs.hash(passwordValue.value, 10)
+            const hashedPassword = await dcodeIO.bcrypt.hash(passwordValue.value, 10)
 
             // Sign up the user with Supabase Auth
             const { data: signData, error: signError } = await supabaseClient.auth.signUp({
