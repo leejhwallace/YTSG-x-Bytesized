@@ -420,7 +420,8 @@ body {
     font-weight: 600;
 }
 
-.editor-field input {
+.editor-field input,
+.editor-field select {
     width: 100%;
     border: 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.22);
@@ -429,10 +430,21 @@ body {
     font: inherit;
     padding: 8px 0;
     outline: none;
+    cursor: pointer;
 }
 
 .editor-field input::placeholder {
     color: rgba(0, 0, 0, 0.25);
+}
+
+.editor-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23171717' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 24px;
 }
 
 @media (max-width: 900px) {

@@ -20,11 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let confirmPasswordValue = document.getElementsByClassName('confirm-password-text')[0]
     let createAccountButton = document.getElementById('sign-up-button')
 
-    // initialize Supabase client (uses the UMD bundle loaded in the HTML)
-    const supabaseClient = window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY
-        ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-        : null
-
     createAccountButton.onclick = async () => {
         if (nameValue.value === "" || emailValue.value === "" || passwordValue.value === "" || confirmPasswordValue.value === "") {
             alert("Please fill in all fields.");
@@ -40,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Call backend signup endpoint
-            const response = await fetch('http://localhost:3000/api/signup', {
+            const response = await fetch('/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

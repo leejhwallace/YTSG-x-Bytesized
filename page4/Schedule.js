@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetForm = () => {
         activeItem = null;
-        editorSheet.querySelectorAll('input').forEach((input) => {
-            input.value = '';
+        editorSheet.querySelectorAll('input, select').forEach((el) => {
+            el.value = '';
         });
     };
 

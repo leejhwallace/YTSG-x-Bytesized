@@ -16,11 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let passwordValue = document.getElementsByClassName('password-text')[0]
     let signInButton = document.getElementById('sign-in-button')
 
-    // Initialize Supabase client
-    const supabaseClient = window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY
-        ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-        : null
-
     signInButton.onclick = async () => {
         if (emailValue.value === "" || passwordValue.value === "") {
             alert("Please fill in all fields.");
@@ -32,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Call backend login endpoint
-            const response = await fetch('http://localhost:3000/api/login', {
+            const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

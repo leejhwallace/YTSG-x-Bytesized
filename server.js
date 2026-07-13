@@ -1,109 +1,50 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+const { buildAuthRouter } = require('./routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// IMPORTANT: backend code MUST use the service_role key, not the publishable key.
+// The publishable key is bound by RLS, which is what was causing /api/signup to
+// create the auth user but silently fail to insert into user-log-in-info.
+// service_role bypasses RLS and is safe to keep server-side because it never
+// reaches the browser. Find it under:
+//   Supabase Dashboard -> Project Settings -> API -> service_role secret
+// Set it in a .env file as SUPABASE_SERVICE_ROLE_KEY=<value>.
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://txfditoxxdjigplckjcc.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz'; // dev fallback only
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_PUBLISHABLE_KEY;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || "https://txfditoxxdjigplckjcc.supabase.co";
-const supabaseKey = process.env.SUPABASE_KEY || "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase client for server-side use.
+// Prefer the service_role key from env so database writes are not blocked by
+// RLS. If it is unset we fall back to the publishable key (dev convenience),
+// but log a strong warning — signup will still fail in that mode.
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.warn(
+        '[server] SUPABASE_SERVICE_ROLE_KEY is not set. Falling back to the publishable key.\n' +
+        '         /api/signup inserts will be blocked by RLS. Set SUPABASE_SERVICE_ROLE_KEY in your .env file.'
+    );
+}
 
-// Signup endpoint
-app.post('/api/signup', async (req, res) => {
-    try {
-        const { full_name, email, password } = req.body;
-
-        // Validate input
-        if (!full_name || !email || !password) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Sign up user with Supabase Auth
-        const { data: signData, error: signError } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password
-        });
-
-        if (signError) {
-            return res.status(400).json({ error: signError.message });
-        }
-
-        // Insert user profile into database
-        const userId = signData.user ? signData.user.id : null;
-        if (userId) {
-            const { data: insertData, error: insertError } = await supabaseClient
-                .from('user-log-in-info')
-                .insert([{
-                    id: userId,
-                    full_name: full_name,
-                    email: email,
-                    password: hashedPassword
-                }]);
-
-            if (insertError) {
-                return res.status(400).json({ error: 'Failed to create user profile: ' + insertError.message });
-            }
-        }
-
-        res.status(200).json({ message: 'Signup successful', userId: userId });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error: ' + err.message });
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false
     }
 });
 
-// Login endpoint
-app.post('/api/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        // Validate input
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Missing email or password' });
-        }
-
-        // Fetch user by email from database
-        const { data: users, error: fetchError } = await supabaseClient
-            .from('user-log-in-info')
-            .select('*')
-            .eq('email', email);
-
-        if (fetchError || !users || users.length === 0) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        const user = users[0];
-
-        // Compare password with hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if (!passwordMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        res.status(200).json({
-            message: 'Login successful',
-            userId: user.id,
-            email: user.email,
-            full_name: user.full_name
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error: ' + err.message });
-    }
-});
+// Mount auth endpoints under /api; see routes.js for handler definitions.
+app.use('/api', buildAuthRouter({
+    supabaseClient,
+    hasServiceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+}));
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
