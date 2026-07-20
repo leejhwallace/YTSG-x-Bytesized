@@ -19,23 +19,21 @@ body {
     background: #ffffff;
     font-family: 'Poppins', sans-serif;
     color: var(--ink);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto; /* Allows page to scroll when items grow */
 }
 
 .page {
     width: 100vw;
-    height: 100vh;
-    min-height: 700px;
+    min-height: 100vh;
     background: #ffffff;
-    border-radius: 0;
-    overflow: hidden;
     position: relative;
+    padding-bottom: 96px; /* Extra padding at the bottom so elements don't hide behind nav bar */
 }
 
 .top-bar {
     height: 76px;
     background: var(--gold);
-    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,7 +49,7 @@ body {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
-    padding: 12px 32px 0;
+    padding: 12px 32px 16px;
 }
 
 .stat-card {
@@ -61,6 +59,11 @@ body {
     padding: 25px 18px 20px;
     display: grid;
     grid-template-rows: auto 1fr;
+    transition: transform 0.15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
 }
 
 .stat-title {
@@ -115,8 +118,7 @@ body {
     border-radius: 7px;
 }
 
-.calendar::before,
-.calendar::after {
+.calendar::before, .calendar::after {
     content: "";
     position: absolute;
     top: -8px;
@@ -126,13 +128,8 @@ body {
     border-radius: 999px;
 }
 
-.calendar::before {
-    left: 12px;
-}
-
-.calendar::after {
-    right: 12px;
-}
+.calendar::before { left: 12px; }
+.calendar::after { right: 12px; }
 
 .warning {
     border: 0;
@@ -189,12 +186,16 @@ body {
     border-radius: 999px;
 }
 
+/* 
+   FIXED PANELS: Removed position: absolute, left, right, top 
+   They now sit naturally inside the flow layout without stacking over each other.
+*/
 .panel {
-    position: absolute;
-    left: 32px;
-    right: 32px;
+    display: block;
+    margin: 0 32px 20px 32px; /* Centers panels horizontally with unified gutters */
     background: var(--panel);
     border-radius: 18px;
+    padding-bottom: 16px;
     overflow: hidden;
 }
 
@@ -205,60 +206,40 @@ body {
     font-size: 20px;
     line-height: 1;
     font-weight: 800;
-}
-
-.active-panel {
-    top: 265px;
-    height: 240px;
+    margin-bottom: 12px;
 }
 
 .project-list {
-    padding: 30px 49px 0;
+    padding: 10px 49px 0;
     display: grid;
-    gap: 30px;
+    gap: 16px;
+}
+
+.project {
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding-bottom: 8px;
+}
+.project:last-child {
+    border-bottom: none;
 }
 
 .project-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    max-width: 505px;
-    margin-bottom: 18px;
     font-size: 14px;
     font-weight: 800;
-}
-
-.progress-track {
-    height: 20px;
-    background: var(--track);
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--gold);
-    border-radius: inherit;
-}
-
-.progress-seventy {
-    width: 70%;
-}
-
-.progress-fifty {
-    width: 50%;
-}
-
-.event-panel {
-    top: 522px;
-    height: 190px;
 }
 
 .event {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 9px 24px;
+    gap: 16px;
+    padding: 12px 32px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.event:last-child {
+    border-bottom: none;
 }
 
 .date-badge {
@@ -273,27 +254,27 @@ body {
     font-size: 11px;
     font-weight: 800;
     line-height: 1.15;
+    flex-shrink: 0;
 }
 
-.event h3,
-.event p {
+.event h3, .event p {
     font-size: 14px;
     font-weight: 800;
     line-height: 1.55;
 }
 
 .bottom-nav {
-    position: absolute;
+    position: fixed; /* Keeps nav anchored at window bottom */
     left: 0;
     right: 0;
     bottom: 0;
     height: 76px;
     background: var(--gold);
-    border-radius: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
     padding: 0 116px;
+    z-index: 9999;
 }
 
 .nav-item {
@@ -326,8 +307,7 @@ body {
     border-radius: 6px;
 }
 
-.nav-calendar::before,
-.nav-calendar::after {
+.nav-calendar::before, .nav-calendar::after {
     content: "";
     position: absolute;
     top: -10px;
@@ -337,13 +317,8 @@ body {
     border-radius: 999px;
 }
 
-.nav-calendar::before {
-    left: 9px;
-}
-
-.nav-calendar::after {
-    right: 9px;
-}
+.nav-calendar::before { left: 9px; }
+.nav-calendar::after { right: 9px; }
 
 .nav-data {
     width: 48px;
@@ -358,53 +333,19 @@ body {
 }
 
 @media (max-width: 900px) {
-    body {
-        overflow: auto;
-    }
-
-    .page {
-        height: auto;
-        min-height: 100vh;
-        padding-bottom: 88px;
-    }
-
-    .top-bar {
-        height: 70px;
-    }
-
-    .dashboard-title {
-        font-size: 34px;
-    }
-
     .stats-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 12px;
     }
-
-    .stat-card {
-        min-height: 125px;
-    }
-
-    .stat-title {
-        font-size: 15px;
-        white-space: normal;
-    }
-
     .panel {
-        position: static;
         margin: 16px 12px 0;
     }
-
-    .active-panel,
-    .event-panel {
-        height: auto;
-        min-height: 210px;
-    }
-
     .project-list {
-        padding: 24px;
+        padding: 16px;
     }
-
+    .event {
+        padding: 12px 16px;
+    }
     .bottom-nav {
         padding: 0 24px;
     }

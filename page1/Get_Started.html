@@ -5,29 +5,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="Get_Started.css">
-    <script src="Get_Started.js" defer></script>
+    
+    <!-- Supabase config -->
+    <script>
+        window.SUPABASE_URL = "https://txfditoxxdjigplckjcc.supabase.co";
+        window.SUPABASE_ANON_KEY = "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    
+    <!-- JavaScript file linked with defer -->
+    <script defer src="Get_Started.js"></script>
     <title>LOG-IN</title>
 </head>
 
 <body>
-
-    <!-- Background circles -->
     <div class="circle circle1"></div>
     <div class="circle circle2"></div>
     <div class="circle circle3"></div>
 
-
-    <!--sign in-->
     <div class="form-container">
         <div class="input-group">
             <img class="email-icon icon" src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="email icon">
-            <input type="text" class="email-text" name="email" placeholder="Email">
+            <input id="login-email-input" type="email" class="email-text" name="email" placeholder="Email">
         </div>
 
         <div class="input-group">
             <img class="icon password-icon" src="https://static.thenounproject.com/png/4020631-200.png"
                 alt="password icon">
-            <input type="password" class="password-text" name="password" placeholder="Password" autocomplete="off">
+            <input id="login-password-input" type="password" class="password-text" name="password" placeholder="Password" autocomplete="off">
             <button type="button" id="show-pw" class="show-pw"><img id="eye-icon" class="eye-icon"
                     src="../images/eye-close.png" alt="Toggle password visibility"></button>
         </div>
@@ -35,31 +40,21 @@
 
     <a href="../page 1.5/Forget_Password.html" class="forgot-password">Forgot password?</a>
     <button id="sign-in-button" class="sign-in-rounded-button">SIGN IN</button>
-    <!--sign in-->
 
-
-    <!-- Header -->
     <p class="GET-STARTED">Get Started</p>
     <p class="START-WITH">Start with</p>
     <p class="SIGN-IN">SIGN IN</p>
     <p class="OR">or</p>
     <p class="SIGN-UP">SIGN UP</p>
 
-    <!-- Sign Up -->
     <p class="No-Account">Don't have an account?</p>
     <button id="sign-up-button" class="sign-up-rounded-button"
         onclick="window.location.href='../page2/create_an_account.html';">SIGN UP</button>
 
-
-
-    <!-- Seperator -->
     <div class="or-wrapper">
         <div class="or-line"></div>
         <div class="or_for_line">OR</div>
         <div class="or-line"></div>
     </div>
-
-
 </body>
-
 </html>
