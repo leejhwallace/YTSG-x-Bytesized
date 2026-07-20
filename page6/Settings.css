@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* FIX: Force global Poppins integration */
+    font-family: 'Poppins', sans-serif !important; 
+}
 
 :root {
     --gold: #efb247;
@@ -14,7 +20,6 @@ body {
     min-height: 100vh;
     background: #ffffff;
     color: var(--ink);
-    font-family: 'Poppins', sans-serif;
     overflow: hidden;
 }
 
@@ -28,7 +33,7 @@ body {
     flex-direction: column;
 }
 
-/* ── TOP BAR ── */
+/* TOP BAR */
 .top-bar {
     height: 78px;
     background: var(--gold);
@@ -58,10 +63,11 @@ body {
     cursor: pointer;
 }
 
-/* ── CONTENT ── */
+/* CONTENT */
 .settings-content {
     flex: 1;
-    padding: 22px 43px 0 55px;
+    /* FIX: Added bottom padding so content doesn't hide under nav */
+    padding: 22px 43px 80px 55px; 
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -156,15 +162,13 @@ body {
     position: relative;
 }
 
-.field-wrap input,
-.field-wrap select {
+.field-wrap input, .field-wrap select {
     width: 100%;
     height: 28px;
     border: 0;
     border-radius: 999px;
     background: var(--field);
     color: #ffffff;
-    font-family: 'Poppins', sans-serif;
     font-size: 12px;
     font-weight: 700;
     outline: none;
@@ -178,8 +182,7 @@ body {
     color: rgba(255,255,255,0.85);
 }
 
-.field-wrap input:focus,
-.field-wrap select:focus {
+.field-wrap input:focus, .field-wrap select:focus {
     background: #7a7a7a;
     box-shadow: 0 0 0 2px var(--gold);
 }
@@ -220,7 +223,6 @@ body {
 }
 
 .eye-btn:hover { color: #fff; }
-
 .eye-btn svg { width: 15px; height: 15px; }
 
 /* Save button */
@@ -237,16 +239,47 @@ body {
     border-radius: 999px;
     background: var(--gold);
     color: #fff;
-    font-family: 'Poppins', sans-serif;
     font-size: 12px;
     font-weight: 800;
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
 }
 
-.save-btn:hover { background: #e0a030; }
-.save-btn:active { transform: scale(0.96); }
+.save-btn:disabled {
+    background: #a9a9a9;
+    cursor: not-allowed;
+}
 
+.save-btn:hover:not(:disabled) { background: #e0a030; }
+.save-btn:active:not(:disabled) { transform: scale(0.96); }
+
+/* Toast Notification Styles */
+.toast {
+    visibility: hidden;
+    min-width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 12px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 90px; 
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s, visibility 0.3s;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 110px;
+}
+
+/* Bottom Nav */
 .bottom-nav {
     position: absolute;
     left: 0;
@@ -295,8 +328,7 @@ body {
     border-radius: 6px;
 }
 
-.nav-calendar::before,
-.nav-calendar::after {
+.nav-calendar::before, .nav-calendar::after {
     content: "";
     position: absolute;
     top: -10px;
@@ -309,7 +341,6 @@ body {
 .nav-calendar::before {
     left: 9px;
 }
-
 .nav-calendar::after {
     right: 9px;
 }
