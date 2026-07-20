@@ -1,250 +1,281 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const STORAGE_KEY = 'schedule-items-v1';
-    const COLORS = ['#6c9aea', '#f3b342', '#df5128', '#4fae5e'];
     const searchInput = document.getElementById('dataSearch');
-    const views = [...document.querySelectorAll('.data-view')];
-    const status = document.getElementById('dataStatus');
-
-    const escapeText = (value) => String(value ?? '').trim();
-    const parseDate = (value) => {
-        const date = new Date(value);
-        return Number.isNaN(date.getTime()) ? null : date;
-    };
-    const formatDate = (value) => {
-        const date = parseDate(value);
-        return date ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not recorded';
-    };
-    const toNumber = (value) => {
-        const parsed = Number.parseInt(String(value ?? '').replace(/[^0-9]/g, ''), 10);
-        return Number.isFinite(parsed) ? parsed : 0;
-    };
-    const clear = (element) => { element.replaceChildren(); };
-    const addCell = (row, value, className = '') => {
-        const cell = document.createElement('td');
-        if (className) cell.className = className;
-        cell.textContent = value;
-        row.append(cell);
-        return cell;
-    };
-    const emptyRow = (target, message, columns) => {
-        const row = document.createElement('tr');
-        const cell = addCell(row, message, 'empty-cell');
-        cell.colSpan = columns;
-        target.append(row);
+    const views = document.querySelectorAll('.data-view');
+    const noResultsMessage = document.getElementById('noResultsMessage');
+    const palette = ['#6c9aea', '#f3b342', '#df5128', '#4fae5e', '#9274c8'];
+    const state = {
+        data: null,
+        selectedProject: null,
+        selectedEvent: null,
     };
 
-    const loadItems = () => {
-        try {
-            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            if (!Array.isArray(parsed)) return [];
-            return parsed
-                .filter((item) => item && (item.type === 'event' || item.type === 'project'))
-                .map((item) => ({ ...item, name: escapeText(item.name) || 'Untitled item' }));
-        } catch (error) {
-            console.warn('Unable to load schedule data', error);
-            return [];
-        }
+    const setView = (name) => views.forEach((view) => view.classList.toggle('active', view.dataset.view === name));
+    const createElement = (tag, text, className) => {
+        const element = document.createElement(tag);
+        if (text !== undefined) element.textContent = text;
+        if (className) element.className = className;
+        return element;
     };
+    const clear = (element) => element.replaceChildren();
+    const percentage = (value, total) => total ? `${((value / total) * 100).toFixed(1).replace(/\.0$/, '')}%` : '0%';
+    const formatDate = (value) => value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-GB') : '—';
+    const formatMinutes = (minutes) => {
+        const value = Number(minutes) || 0;
+        const hours = Math.floor(value / 60);
+        const remainder = value % 60;
+        if (!hours) return `${remainder} min`;
+        return `${hours} hour${hours === 1 ? '' : 's'}${remainder ? ` ${remainder} min` : ''}`;
+    };
+    const matching = (item, term) => `${item.name || ''} ${item.description || ''}`.toLowerCase().includes(term);
 
-    let items = loadItems();
-
-    const renderLegend = (target, categories, noDataMessage) => {
-        clear(target);
-        if (!categories.length) {
-            const message = document.createElement('p');
-            message.textContent = noDataMessage;
-            target.append(message);
+    const renderDonut = (element, values, colors) => {
+        const total = values.reduce((sum, value) => sum + value, 0);
+        if (!total) {
+            element.style.background = '#8f8f8f';
             return;
         }
-        categories.forEach((category, index) => {
-            const line = document.createElement('p');
-            line.style.color = COLORS[index % COLORS.length];
-            line.textContent = `${category.name} ~ ${category.percent}%`;
-            target.append(line);
-        });
+        let start = 0;
+        element.style.background = `conic-gradient(${values.map((value, index) => {
+            const end = start + (value / total) * 100;
+            const segment = `${colors[index % colors.length]} ${start}% ${end}%`;
+            start = end;
+            return segment;
+        }).join(', ')})`;
     };
 
     const renderOverview = () => {
-        const events = items.filter((item) => item.type === 'event');
-        const projects = items.filter((item) => item.type === 'project');
-        const categoryCounts = new Map();
-
+        const { events, volunteerHours } = state.data;
+        const typeTotals = new Map();
         events.forEach((event) => {
-            const category = escapeText(event.category) || 'Not recorded';
-            categoryCounts.set(category, (categoryCounts.get(category) || 0) + toNumber(event.attendees));
+            const type = event.event_type || 'Other';
+            typeTotals.set(type, (typeTotals.get(type) || 0) + Number(event.attendee_count || 0));
+        });
+        const types = [...typeTotals.entries()].sort((a, b) => b[1] - a[1]);
+        renderDonut(document.getElementById('eventTypeDonut'), types.map(([, count]) => count), palette);
+        const legend = document.getElementById('eventTypeLegend');
+        clear(legend);
+        const typeTotal = types.reduce((sum, [, count]) => sum + count, 0);
+        if (!types.length) legend.append(createElement('p', 'No event data yet'));
+        types.forEach(([type, count], index) => {
+            const item = createElement('p', `${type} ~ ${percentage(count, typeTotal)}`);
+            item.style.color = palette[index % palette.length];
+            legend.append(item);
         });
 
-        const totalTurnout = [...categoryCounts.values()].reduce((sum, value) => sum + value, 0);
-        const categories = [...categoryCounts.entries()]
-            .map(([name, value]) => ({ name, value, percent: totalTurnout ? Math.round((value / totalTurnout) * 100) : 0 }))
-            .sort((a, b) => b.value - a.value);
-        const donut = document.getElementById('overviewDonut');
-        const gradient = categories.length && totalTurnout
-            ? `conic-gradient(${categories.map((category, index) => {
-                const start = categories.slice(0, index).reduce((sum, current) => sum + current.percent, 0);
-                const end = index === categories.length - 1 ? 100 : start + category.percent;
-                return `${COLORS[index % COLORS.length]} ${start}% ${end}%`;
-            }).join(', ')})`
-            : 'conic-gradient(#aaa 0 100%)';
-        donut.style.background = gradient;
-        donut.setAttribute('aria-label', categories.length ? `Event turnout by category: ${categories.map((item) => `${item.name} ${item.percent}%`).join(', ')}` : 'No event turnout data yet');
-        renderLegend(document.getElementById('overviewLegend'), categories, 'No event turnout recorded.');
-
-        const latestEventDate = events.reduce((latest, event) => {
-            const date = parseDate(event.startDate);
-            return date && (!latest || date > latest) ? date : latest;
-        }, null) || new Date();
-        const months = Array.from({ length: 12 }, (_, index) => new Date(latestEventDate.getFullYear(), latestEventDate.getMonth() - 11 + index, 1));
-        const monthlyCounts = months.map((month) => events.filter((event) => {
-            const date = parseDate(event.startDate);
-            return date && date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
-        }).length);
-        const maxCount = Math.max(...monthlyCounts, 0);
-        const chart = document.getElementById('growthChart');
-        clear(chart);
-        monthlyCounts.forEach((count, index) => {
-            const bar = document.createElement('span');
-            bar.className = 'bar';
-            bar.style.height = `${maxCount ? Math.max(5, (count / maxCount) * 100) : 5}%`;
-            bar.title = `${months[index].toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}: ${count} event${count === 1 ? '' : 's'}`;
-            chart.append(bar);
+        const monthly = new Map();
+        events.forEach((event) => {
+            if (!event.event_date) return;
+            const month = event.event_date.slice(0, 7);
+            monthly.set(month, (monthly.get(month) || 0) + 1);
         });
-        chart.setAttribute('aria-label', maxCount ? `Events per month ending ${latestEventDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : 'No events recorded in the last twelve months');
+        const barValues = [...monthly.entries()].sort(([a], [b]) => a.localeCompare(b)).slice(-12);
+        const largest = Math.max(...barValues.map(([, value]) => value), 1);
+        const bars = document.getElementById('eventGrowthBars');
+        clear(bars);
+        barValues.forEach(([month, value]) => {
+            const bar = createElement('div', undefined, 'bar');
+            bar.style.height = `${Math.max(4, (value / largest) * 100)}%`;
+            bar.title = `${month}: ${value} event${value === 1 ? '' : 's'}`;
+            bars.append(bar);
+        });
 
-        const eventRows = document.getElementById('eventSummaryRows');
+        const eventRows = document.getElementById('overviewEvents');
         clear(eventRows);
-        const sortedEvents = [...events].sort((a, b) => (parseDate(b.startDate)?.getTime() || 0) - (parseDate(a.startDate)?.getTime() || 0));
-        if (!sortedEvents.length) {
-            emptyRow(eventRows, 'No events added in Schedule yet.', 3);
-        } else {
-            sortedEvents.slice(0, 5).forEach((event) => {
-                const row = document.createElement('tr');
-                const eventCell = addCell(row, event.name);
-                if (event.description) {
-                    const sub = document.createElement('span');
-                    sub.className = 'sub';
-                    sub.textContent = ` — ${escapeText(event.description)}`;
-                    eventCell.append(document.createElement('br'), sub);
-                }
-                addCell(row, event.attendees === '' || event.attendees == null ? 'Not recorded' : String(toNumber(event.attendees)));
-                addCell(row, escapeText(event.category) || 'Not recorded');
-                eventRows.append(row);
-            });
-        }
-
-        const contributions = new Map();
-        projects.forEach((project) => {
-            new Set([escapeText(project.lead), escapeText(project.assignee)].filter(Boolean)).forEach((person) => {
-                contributions.set(person, (contributions.get(person) || 0) + 1);
-            });
+        events.slice(0, 12).forEach((event) => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.append(createElement('span', event.name || 'Untitled event'));
+            if (event.description) nameCell.append(document.createElement('br'), createElement('span', event.description, 'sub'));
+            row.append(nameCell, createElement('td', String(event.attendee_count || 0)), createElement('td', event.event_type || 'Other'));
+            eventRows.append(row);
         });
-        const volunteerRows = document.getElementById('volunteerSummaryRows');
+        if (!events.length) eventRows.append(emptyRow(3, 'No events have been added yet.'));
+
+        const totalsByVolunteer = new Map();
+        volunteerHours.forEach((entry) => {
+            const key = `${entry.volunteer_name || 'Unknown'}\u0000${entry.department || ''}`;
+            totalsByVolunteer.set(key, (totalsByVolunteer.get(key) || 0) + Number(entry.hours || 0));
+        });
+        const volunteers = [...totalsByVolunteer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
+        const volunteerRows = document.getElementById('overviewVolunteers');
         clear(volunteerRows);
-        const activePeople = [...contributions.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-        if (!activePeople.length) {
-            emptyRow(volunteerRows, 'No project people recorded yet.', 2);
-        } else {
-            activePeople.slice(0, 5).forEach(([person, count]) => {
-                const row = document.createElement('tr');
-                addCell(row, person);
-                addCell(row, String(count));
-                volunteerRows.append(row);
-            });
-        }
+        volunteers.forEach(([key, hours]) => {
+            const [name, department] = key.split('\u0000');
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            nameCell.append(createElement('span', name));
+            if (department) nameCell.append(document.createElement('br'), createElement('span', department, 'sub'));
+            row.append(nameCell, createElement('td', `${hours.toFixed(2).replace(/\.00$/, '')} hrs`));
+            volunteerRows.append(row);
+        });
+        if (!volunteers.length) volunteerRows.append(emptyRow(2, 'No volunteer hours have been logged yet.'));
+    };
+
+    const emptyRow = (columns, message) => {
+        const row = document.createElement('tr');
+        const cell = createElement('td', message, 'sub');
+        cell.colSpan = columns;
+        row.append(cell);
+        return row;
     };
 
     const renderProject = (project) => {
-        document.getElementById('projectTitle').textContent = project.name;
-        document.getElementById('projectSubtitle').textContent = escapeText(project.status) || 'Project details';
-        const rows = document.getElementById('projectDetailRows');
+        state.selectedProject = project;
+        const tasks = state.data.projectTasks.filter((task) => task.project_id === project.id);
+        const calculatedMinutes = tasks.reduce((total, task) => total + Number(task.duration_minutes || 0), 0);
+        const totalMinutes = project.manual_total_minutes ?? calculatedMinutes;
+        document.getElementById('projectTotalHours').textContent = formatMinutes(totalMinutes);
+        document.getElementById('projectDelayReason').textContent = project.delay_reason || 'No delays recorded.';
+        const rows = document.getElementById('projectTasks');
         clear(rows);
-        const row = document.createElement('tr');
-        addCell(row, escapeText(project.description) || 'No task description recorded');
-        const start = formatDate(project.startDate);
-        const end = formatDate(project.endDate);
-        addCell(row, start === end ? start : `${start} – ${end}`);
-        addCell(row, escapeText(project.assignee) || escapeText(project.lead) || 'Not recorded');
-        addCell(row, formatDate(project.endDate));
-        rows.append(row);
-        document.getElementById('projectDelayReason').textContent = escapeText(project.notes) || 'No delay reason recorded.';
+        tasks.forEach((task) => {
+            const row = document.createElement('tr');
+            row.append(
+                createElement('td', task.task_name || 'Untitled task'),
+                createElement('td', formatMinutes(task.duration_minutes)),
+                createElement('td', task.completed_by || '—'),
+                createElement('td', formatDate(task.completed_at)),
+            );
+            rows.append(row);
+        });
+        if (!tasks.length) rows.append(emptyRow(4, 'No tasks have been logged for this project.'));
     };
 
     const renderEvent = (event) => {
-        const feedback = document.getElementById('feedbackDonut');
-        feedback.style.background = 'conic-gradient(#aaa 0 100%)';
-        feedback.setAttribute('aria-label', `No feedback ratings recorded for ${event.name}`);
-        renderLegend(document.getElementById('feedbackLegend'), [], 'No feedback ratings recorded.');
-
-        const attendees = toNumber(event.attendees);
-        const contributors = new Set(items.filter((item) => item.type === 'project').flatMap((project) => [escapeText(project.lead), escapeText(project.assignee)]).filter(Boolean));
-        const total = attendees + contributors.size;
-        const difference = attendees - contributors.size;
-        const percentage = (value) => total ? `${Math.round((value / total) * 100)}%` : '—';
-        const headcount = document.getElementById('headcountRows');
-        clear(headcount);
-        [
-            ['Project volunteer records', contributors.size, percentage(contributors.size)],
-            ['Attendee headcount', attendees, percentage(attendees)],
-            ['Difference', difference, total ? percentage(Math.abs(difference)) : '—'],
-        ].forEach(([label, value, percent]) => {
-            const row = document.createElement('div');
-            row.className = 'headcount-row';
-            [['span', 'hc-label', label], ['strong', 'hc-num', String(value)], ['strong', 'hc-pct', percent]].forEach(([tag, className, text]) => {
-                const element = document.createElement(tag);
-                element.className = className;
-                element.textContent = text;
-                row.append(element);
-            });
-            headcount.append(row);
+        state.selectedEvent = event;
+        const feedback = state.data.feedback.filter((entry) => entry.event_id === event.id);
+        const ratings = [5, 4, 3, 2, 1].map((rating) => feedback.filter((entry) => Number(entry.rating) === rating).length);
+        renderDonut(document.getElementById('ratingDonut'), ratings, ['#f3b342', '#6c9aea', '#4fae5e', '#df5128', '#9274c8']);
+        const ratingLabels = document.getElementById('ratingLabels');
+        clear(ratingLabels);
+        const feedbackTotal = ratings.reduce((sum, value) => sum + value, 0);
+        ratings.forEach((count, index) => {
+            const label = createElement('p', `${5 - index} Stars ~ ${percentage(count, feedbackTotal)}`);
+            label.style.color = ['#f3b342', '#6c9aea', '#4fae5e', '#df5128', '#9274c8'][index];
+            ratingLabels.append(label);
         });
 
-        const reach = document.getElementById('reachMetrics');
-        clear(reach);
-        reach.classList.remove('has-data');
-        const message = document.createElement('p');
-        message.textContent = escapeText(event.location)
-            ? `Reach-source metrics have not been recorded. Event location: ${escapeText(event.location)}.`
-            : 'No reach-source metrics recorded for this event.';
-        reach.append(message);
+        const demographics = state.data.demographics.filter((entry) => entry.event_id === event.id);
+        const demographicsByGroup = new Map();
+        demographics.forEach((entry) => {
+            const current = demographicsByGroup.get(entry.age_group) || { first: 0, returning: 0 };
+            current[entry.is_first_timer ? 'first' : 'returning'] += Number(entry.attendee_count || 0);
+            demographicsByGroup.set(entry.age_group, current);
+        });
+        const barContainer = document.getElementById('demographicBars');
+        clear(barContainer);
+        const groupLabels = { children: 'children (3-12)', teenagers: 'teenagers (13-19)', adults: 'adults (20-39)' };
+        Object.entries(groupLabels).forEach(([group, label]) => {
+            const counts = demographicsByGroup.get(group) || { first: 0, returning: 0 };
+            const total = counts.first + counts.returning;
+            const col = createElement('div', undefined, 'demo-col');
+            const stack = createElement('div', undefined, 'demo-group');
+            stack.style.height = `${Math.max(12, Math.min(55, total * 2))}px`;
+            const first = createElement('span', percentage(counts.first, total), 'demo-seg seg-orange');
+            const returning = createElement('span', percentage(counts.returning, total), 'demo-seg seg-yellow');
+            first.style.flex = String(counts.first || 0.001);
+            returning.style.flex = String(counts.returning || 0.001);
+            stack.append(first, returning);
+            col.append(stack, createElement('span', label, 'demo-label'));
+            barContainer.append(col);
+        });
+        const allDemographics = demographics.reduce((sum, entry) => sum + Number(entry.attendee_count || 0), 0);
+        const firstTimers = demographics.filter((entry) => entry.is_first_timer).reduce((sum, entry) => sum + Number(entry.attendee_count || 0), 0);
+        const key = document.getElementById('demographicKey');
+        clear(key);
+        key.append(createElement('p', `First timers ~ ${percentage(firstTimers, allDemographics)}`, 'demo-key first-timer'));
+        key.append(createElement('p', `Returning ~ ${percentage(allDemographics - firstTimers, allDemographics)}`, 'demo-key returning'));
+
+        const volunteers = Number(event.volunteer_count || 0);
+        const attendees = Number(event.attendee_count || 0);
+        const difference = volunteers - attendees;
+        document.getElementById('volunteerHeadcount').textContent = volunteers;
+        document.getElementById('volunteerHeadcountPct').textContent = volunteers ? '100%' : '0%';
+        document.getElementById('attendeeHeadcount').textContent = attendees;
+        document.getElementById('attendeeHeadcountPct').textContent = percentage(attendees, volunteers);
+        document.getElementById('headcountDifference').textContent = difference;
+        document.getElementById('headcountDifferencePct').textContent = percentage(Math.abs(difference), volunteers);
+
+        const reach = state.data.reach.filter((entry) => entry.event_id === event.id);
+        const sources = ['Word of Mouth', 'Website', 'Social Media'];
+        const reaches = sources.map((source) => reach.filter((entry) => entry.source === source).reduce((sum, entry) => sum + Number(entry.reach_count || 0), 0));
+        const reachTotal = reaches.reduce((sum, value) => sum + value, 0);
+        ['reachWord', 'reachWebsite', 'reachSocial'].forEach((id, index) => { document.getElementById(id).style.flex = String(reaches[index] || 0.001); });
+        ['reachWordLabel', 'reachWebsiteLabel', 'reachSocialLabel'].forEach((id, index) => { document.getElementById(id).textContent = `${sources[index]} ~ ${percentage(reaches[index], reachTotal)}`; });
     };
 
-    const showView = (name) => {
-        views.forEach((view) => view.classList.toggle('active', view.dataset.view === name));
-    };
-
-    const updateSearch = () => {
-        const query = escapeText(searchInput.value).toLocaleLowerCase();
-        if (!query) {
-            showView('overview');
-            status.textContent = 'Showing all schedule data.';
-            return;
+    const updateViewForSearch = () => {
+        const term = searchInput.value.trim().toLowerCase();
+        if (!term) return setView('overview');
+        const project = state.data.projects.find((item) => matching(item, term));
+        const event = state.data.events.find((item) => matching(item, term));
+        if (project) {
+            renderProject(project);
+            return setView('project');
         }
-        const match = items.find((item) => `${item.name} ${item.description || ''} ${item.type}`.toLocaleLowerCase().includes(query));
-        if (!match) {
-            showView('none');
-            status.textContent = 'No matching event or project found.';
-            return;
+        if (event) {
+            renderEvent(event);
+            return setView('event');
         }
-        if (match.type === 'project') {
-            renderProject(match);
-            showView('project');
-        } else {
-            renderEvent(match);
-            showView('event');
-        }
-        status.textContent = `Showing data for ${match.name}.`;
+        noResultsMessage.textContent = `No event or project matches “${searchInput.value.trim()}”.`;
+        setView('none');
     };
 
-    const refresh = () => {
-        items = loadItems();
-        renderOverview();
-        updateSearch();
+    const saveProject = async (changes) => {
+        if (!state.selectedProject) return;
+        const response = await fetch(`/api/data/projects/${encodeURIComponent(state.selectedProject.id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(changes),
+        });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || 'Unable to save the project.');
+        await loadData();
     };
 
-    searchInput.addEventListener('input', updateSearch);
-    window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY) refresh();
+    document.querySelector('.project-hours .edit-button').addEventListener('click', async () => {
+        if (!state.selectedProject) return;
+        const current = state.selectedProject.manual_total_minutes ?? state.data.projectTasks
+            .filter((task) => task.project_id === state.selectedProject.id)
+            .reduce((total, task) => total + Number(task.duration_minutes || 0), 0);
+        const value = window.prompt('Total time spent (whole minutes):', current);
+        if (value === null) return;
+        try {
+            await saveProject({ totalMinutes: value.trim() });
+        } catch (error) {
+            window.alert(error.message);
+        }
     });
-    window.addEventListener('focus', refresh);
-    refresh();
+    document.querySelector('.project-reasons .edit-button').addEventListener('click', async () => {
+        if (!state.selectedProject) return;
+        const value = window.prompt('Reason for delays:', state.selectedProject.delay_reason || '');
+        if (value === null) return;
+        try {
+            await saveProject({ delayReason: value });
+        } catch (error) {
+            window.alert(error.message);
+        }
+    });
+
+    const loadData = async () => {
+        searchInput.placeholder = 'Loading data…';
+        searchInput.disabled = true;
+        try {
+            const response = await fetch('/api/data');
+            const body = await response.json();
+            if (!response.ok) throw new Error(body.error || 'Unable to load Page 5 data.');
+            state.data = body;
+            renderOverview();
+            updateViewForSearch();
+        } catch (error) {
+            noResultsMessage.textContent = error.message;
+            setView('none');
+        } finally {
+            searchInput.placeholder = 'Search Event/Project';
+            searchInput.disabled = false;
+        }
+    };
+
+    searchInput.addEventListener('input', () => state.data && updateViewForSearch());
+    loadData();
 });
