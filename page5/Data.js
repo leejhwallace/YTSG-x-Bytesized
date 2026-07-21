@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Cache values for turnout graph
-    let turnoutCache = { workshop: 30, outreach: 50, fundraiser: 20 };
+    let turnoutCache = { workshop: 0, outreach: 0, fundraiser: 0 };
 
     const donutChart = document.getElementById('overviewDonutChart');
     const lblWorkshop = document.getElementById('lblWorkshop');
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load persisted turnout counts from database
     async function loadTurnoutFromDB() {
         if (!supabaseClient) {
-            renderTurnoutGraph(30, 50, 20);
+            renderTurnoutGraph(0, 0, 0);
             return;
         }
         try {
@@ -113,17 +113,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const oObj = data.find(item => item.event_type === 'Community Outreach');
                 const fObj = data.find(item => item.event_type === 'Fundraiser');
 
-                const wVal = wObj ? wObj.headcount : 30;
-                const oVal = oObj ? oObj.headcount : 50;
-                const fVal = fObj ? fObj.headcount : 20;
+                const wVal = wObj ? wObj.headcount : 0;
+                const oVal = oObj ? oObj.headcount : 0;
+                const fVal = fObj ? fObj.headcount : 0;
 
                 renderTurnoutGraph(wVal, oVal, fVal);
             } else {
-                renderTurnoutGraph(30, 50, 20);
+                renderTurnoutGraph(0, 0, 0);
             }
         } catch (err) {
             console.warn("Could not load turnout from DB, using fallback defaults:", err.message);
-            renderTurnoutGraph(30, 50, 20);
+            renderTurnoutGraph(0, 0, 0);
         }
     }
 
@@ -358,14 +358,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Load Event Analytical Layouts & Update Graphs
+    // Load Event Analytical Layouts & Update Graphs (Start from nothing)
     async function loadEventStatistics(eventName) {
         if (!supabaseClient) return;
         try {
             let { data, error } = await supabaseClient.from('Event_Stats').select('*').eq('event_name', eventName).maybeSingle();
             
             if (!data) {
-                const baseline = { event_name: eventName, stars_5: 40, stars_4: 30, stars_3: 20, stars_2: 10, child_orange: 20, child_yellow: 80, teen_orange: 60, teen_yellow: 40, adult_orange: 5, adult_yellow: 95, first_timers: 28, returning_pct: 72, volunteer_count: 130, attendee_count: 95, reach_word: 50, reach_website: 10, reach_social: 40 };
+                // CHANGED: Baseline is now completely 0 instead of hardcoded numbers.
+                const baseline = { event_name: eventName, stars_5: 0, stars_4: 0, stars_3: 0, stars_2: 0, child_orange: 0, child_yellow: 0, teen_orange: 0, teen_yellow: 0, adult_orange: 0, adult_yellow: 0, first_timers: 0, returning_pct: 0, volunteer_count: 0, attendee_count: 0, reach_word: 0, reach_website: 0, reach_social: 0 };
                 await supabaseClient.from('Event_Stats').insert([baseline]);
                 data = baseline;
             }
@@ -518,32 +519,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (target === 'turnout') {
             modalTitle.textContent = "Enter Event Turnout Raw Headcounts";
             fieldsWrapper.innerHTML = `
-                <label class="editor-field"><span>Workshop Headcount</span><input type="number" id="stat_turnout_w" value="${turnoutCache.workshop}" min="0"></label>
-                <label class="editor-field"><span>Community Outreach Headcount</span><input type="number" id="stat_turnout_o" value="${turnoutCache.outreach}" min="0"></label>
-                <label class="editor-field"><span>Fundraiser Headcount</span><input type="number" id="stat_turnout_f" value="${turnoutCache.fundraiser}" min="0"></label>
+                <label class="editor-field"><span>Workshop Headcount</span><input type="number" id="stat_turnout_w" value="${turnoutCache.workshop || 0}" min="0"></label>
+                <label class="editor-field"><span>Community Outreach Headcount</span><input type="number" id="stat_turnout_o" value="${turnoutCache.outreach || 0}" min="0"></label>
+                <label class="editor-field"><span>Fundraiser Headcount</span><input type="number" id="stat_turnout_f" value="${turnoutCache.fundraiser || 0}" min="0"></label>
             `;
         } else if (target === 'feedback') {
             modalTitle.textContent = "Enter Feedback Raw Headcounts";
+            // CHANGED: Now starts at 0 instead of hardcoded 40, 30, 20, 10
             fieldsWrapper.innerHTML = `
-                <label class="editor-field"><span>5 Stars Count</span><input type="number" id="stat_cnt_s5" value="40" min="0"></label>
-                <label class="editor-field"><span>4 Stars Count</span><input type="number" id="stat_cnt_s4" value="30" min="0"></label>
-                <label class="editor-field"><span>3 Stars Count</span><input type="number" id="stat_cnt_s3" value="20" min="0"></label>
-                <label class="editor-field"><span>2 Stars Count</span><input type="number" id="stat_cnt_s2" value="10" min="0"></label>
+                <label class="editor-field"><span>5 Stars Count</span><input type="number" id="stat_cnt_s5" value="0" min="0"></label>
+                <label class="editor-field"><span>4 Stars Count</span><input type="number" id="stat_cnt_s4" value="0" min="0"></label>
+                <label class="editor-field"><span>3 Stars Count</span><input type="number" id="stat_cnt_s3" value="0" min="0"></label>
+                <label class="editor-field"><span>2 Stars Count</span><input type="number" id="stat_cnt_s2" value="0" min="0"></label>
             `;
         } else if (target === 'demographics') {
             modalTitle.textContent = "Enter Demographics Headcounts";
+            // CHANGED: Now starts at 0 instead of hardcoded values
             fieldsWrapper.innerHTML = `
                 <h4 style="font-size:14px; margin-top:4px;">Children (3-12)</h4>
-                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_c_first" value="2" min="0"></label>
-                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_c_ret" value="8" min="0"></label>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_c_first" value="0" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_c_ret" value="0" min="0"></label>
                 
                 <h4 style="font-size:14px; margin-top:8px;">Teenagers (13-19)</h4>
-                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_t_first" value="6" min="0"></label>
-                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_t_ret" value="4" min="0"></label>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_t_first" value="0" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_t_ret" value="0" min="0"></label>
                 
                 <h4 style="font-size:14px; margin-top:8px;">Adults (20-39)</h4>
-                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_a_first" value="1" min="0"></label>
-                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_a_ret" value="19" min="0"></label>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_a_first" value="0" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_a_ret" value="0" min="0"></label>
             `;
         } else if (target === 'headcount') {
             modalTitle.textContent = "Enter Headcount Numbers";
@@ -552,16 +555,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let res = await supabaseClient.from('Event_Stats').select('*').eq('event_name', currentSearchedEvent).maybeSingle();
                 data = res.data;
             }
+            // CHANGED: Fallbacks to 0 instead of 130 and 95
             fieldsWrapper.innerHTML = `
-                <label class="editor-field"><span>Volunteer Headcount</span><input type="number" id="stat_vol" value="${data?.volunteer_count || 130}" min="0"></label>
-                <label class="editor-field"><span>Attendee Headcount</span><input type="number" id="stat_att" value="${data?.attendee_count || 95}" min="0"></label>
+                <label class="editor-field"><span>Volunteer Headcount</span><input type="number" id="stat_vol" value="${data?.volunteer_count || 0}" min="0"></label>
+                <label class="editor-field"><span>Attendee Headcount</span><input type="number" id="stat_att" value="${data?.attendee_count || 0}" min="0"></label>
             `;
         } else if (target === 'reach') {
             modalTitle.textContent = "Enter Reach Source Volume Numbers";
+            // CHANGED: Now starts at 0 instead of hardcoded 50, 10, 40
             fieldsWrapper.innerHTML = `
-                <label class="editor-field"><span>Word of Mouth Count</span><input type="number" id="stat_cnt_rw" value="50" min="0"></label>
-                <label class="editor-field"><span>Website Signups Count</span><input type="number" id="stat_cnt_rweb" value="10" min="0"></label>
-                <label class="editor-field"><span>Social Media Count</span><input type="number" id="stat_cnt_rs" value="40" min="0"></label>
+                <label class="editor-field"><span>Word of Mouth Count</span><input type="number" id="stat_cnt_rw" value="0" min="0"></label>
+                <label class="editor-field"><span>Website Signups Count</span><input type="number" id="stat_cnt_rweb" value="0" min="0"></label>
+                <label class="editor-field"><span>Social Media Count</span><input type="number" id="stat_cnt_rs" value="0" min="0"></label>
             `;
         }
 

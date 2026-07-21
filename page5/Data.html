@@ -27,7 +27,6 @@
     </section>
     <p class="search-hint" id="searchHint" hidden>No event or project matches your search.</p>
 
-    <!-- VIEW 1: GENERAL OVERVIEW -->
     <section class="data-view overview-view active" id="viewOverview">
         <div class="overview-top-row">
             <article class="panel chart-panel donut-panel clickable-stat" data-target="turnout" style="cursor: pointer;">
@@ -63,8 +62,7 @@
                         <tr><th>Event</th><th>No. of participants</th><th>Event type</th></tr>
                     </thead>
                     <tbody id="eventTableBody">
-                        <!-- Loaded dynamically from Supabase -->
-                    </tbody>
+                        </tbody>
                 </table>
             </article>
             <article class="panel volunteer-panel">
@@ -73,14 +71,12 @@
                         <tr><th>Most active volunteer</th><th>Number of hrs</th></tr>
                     </thead>
                     <tbody id="volunteerTableBody">
-                        <!-- Loaded dynamically from Supabase -->
-                    </tbody>
+                        </tbody>
                 </table>
             </article>
         </div>
     </section>
 
-    <!-- VIEW 2: PROJECT VIEW -->
     <section class="data-view project-view" id="viewProject">
         <header class="entity-info" id="projectInfoHeader" hidden>
             <h2 id="projectInfoName"></h2>
@@ -91,7 +87,7 @@
             <article class="panel project-hours clickable-stat" data-target="project-tasks">
                 <button class="edit-button" id="addProjectTaskBtn" type="button"> </button>
                 <div class="project-hours-header">
-                    <h2 id="projectHoursTotal">11 Hours 10min</h2>
+                    <h2 id="projectHoursTotal">0 Hours 0min</h2>
                     <p class="subtitle">Total amount spent</p>
                 </div>
                 <table class="hours-table">
@@ -99,21 +95,18 @@
                         <tr><th>Task</th><th>Hours Spent</th><th>Who Completed</th><th>When Completed</th></tr>
                     </thead>
                     <tbody id="projectTaskBody">
-                        <!-- Loaded dynamically -->
-                    </tbody>
+                        </tbody>
                 </table>
             </article>
             <article class="panel project-reasons clickable-stat" data-target="project-delays">
                 <button class="edit-button" id="addProjectDelayBtn" type="button"> </button>
                 <h2>Reasons for delays</h2>
                 <ul class="delay-list" id="projectDelayBody">
-                    <!-- Delay items append here -->
-                </ul>
+                    </ul>
             </article>
         </div>
     </section>
 
-    <!-- VIEW 3: EVENT SEARCH VIEW -->
     <section class="data-view event-view" id="viewEvent">
         <header class="entity-info" id="eventInfoHeader" hidden>
             <h2 id="eventInfoName"></h2>
@@ -127,10 +120,10 @@
                     <div class="feedback-content">
                         <div class="rating-donut" id="eventRatingDonut"></div>
                         <div class="rating-labels" id="eventRatingLabels">
-                            <p class="rating-five">5 Stars ~ 40%</p>
-                            <p class="rating-four">4 Stars ~ 30%</p>
-                            <p class="rating-three">3 Stars ~ 20%</p>
-                            <p class="rating-two">2 Stars ~ 10%</p>
+                            <p class="rating-five">5 Stars ~ 0%</p>
+                            <p class="rating-four">4 Stars ~ 0%</p>
+                            <p class="rating-three">3 Stars ~ 0%</p>
+                            <p class="rating-two">2 Stars ~ 0%</p>
                         </div>
                     </div>
                 </article>
@@ -139,21 +132,21 @@
                     <div class="demo-content">
                         <div class="demographic-bars">
                             <div class="demo-col">
-                                <div class="demo-group children" id="barChild"><span class="demo-seg seg-orange">20%</span><span class="demo-seg seg-yellow">80%</span></div>
+                                <div class="demo-group children" id="barChild"><span class="demo-seg seg-orange" style="height:0%">0%</span><span class="demo-seg seg-yellow" style="height:0%">0%</span></div>
                                 <span class="demo-label">children (3-12)</span>
                             </div>
                             <div class="demo-col">
-                                <div class="demo-group teenagers" id="barTeen"><span class="demo-seg seg-orange">60%</span><span class="demo-seg seg-yellow">40%</span></div>
+                                <div class="demo-group teenagers" id="barTeen"><span class="demo-seg seg-orange" style="height:0%">0%</span><span class="demo-seg seg-yellow" style="height:0%">0%</span></div>
                                 <span class="demo-label">teenagers (13-19)</span>
                             </div>
                             <div class="demo-col">
-                                <div class="demo-group adults" id="barAdult"><span class="demo-seg seg-orange">5%</span><span class="demo-seg seg-yellow">95%</span></div>
+                                <div class="demo-group adults" id="barAdult"><span class="demo-seg seg-orange" style="height:0%">0%</span><span class="demo-seg seg-yellow" style="height:0%">0%</span></div>
                                 <span class="demo-label">adults (20-39)</span>
                             </div>
                         </div>
                         <div class="demo-key-row" id="demoKeyLabels">
-                            <p class="demo-key first-timer">First timers ~ 28.33%</p>
-                            <p class="demo-key returning">Returning ~ 71.67%</p>
+                            <p class="demo-key first-timer">First timers ~ 0%</p>
+                            <p class="demo-key returning">Returning ~ 0%</p>
                         </div>
                     </div>
                 </article>
@@ -163,15 +156,15 @@
                 <div class="headcount-table">
                     <div class="headcount-row">
                         <span class="hc-label">Volunteer headcount</span>
-                        <strong class="hc-num" id="lblVolHeadcount">130</strong>
+                        <strong class="hc-num" id="lblVolHeadcount">0</strong>
                     </div>
                     <div class="headcount-row">
                         <span class="hc-label">attendee headcount</span>
-                        <strong class="hc-num" id="lblAttHeadcount">95</strong>
+                        <strong class="hc-num" id="lblAttHeadcount">0</strong>
                     </div>
                     <div class="headcount-row total-row">
                         <span class="hc-label">Difference</span>
-                        <strong class="hc-num" id="lblDiffHeadcount">35</strong>
+                        <strong class="hc-num" id="lblDiffHeadcount">0</strong>
                     </div>
                 </div>
             </article>
@@ -179,21 +172,20 @@
                 <h2>Reach metrics</h2>
                 <div class="reach-content">
                     <div class="stacked-bar">
-                        <span class="reach-word" id="barReachWord" style="height: 50%;"></span>
-                        <span class="reach-website" id="barReachWeb" style="height: 10%;"></span>
-                        <span class="reach-social" id="barReachSocial" style="height: 40%;"></span>
+                        <span class="reach-word" id="barReachWord" style="height: 0%;"></span>
+                        <span class="reach-website" id="barReachWeb" style="height: 0%;"></span>
+                        <span class="reach-social" id="barReachSocial" style="height: 0%;"></span>
                     </div>
                     <div class="reach-labels" id="reachLabelsContainer">
-                        <p class="word">Word of Mouth ~ 50%</p>
-                        <p class="website">Website ~ 10%</p>
-                        <p class="social">Social Media ~ 40%</p>
+                        <p class="word">Word of Mouth ~ 0%</p>
+                        <p class="website">Website ~ 0%</p>
+                        <p class="social">Social Media ~ 0%</p>
                     </div>
                 </div>
             </article>
         </div>
     </section>
 
-    <!-- FORM MODALS FOR SUBMISSIONS -->
     <section class="editor-sheet" id="taskModal" aria-hidden="true">
         <div class="editor-header">
             <button class="editor-close" type="button" onclick="closeActiveModal('taskModal')">&#10005;</button>
@@ -231,12 +223,10 @@
         </div>
         <div class="editor-content">
             <div class="editor-column" id="statsModalFields">
-                <!-- Fields append here dynamically -->
-            </div>
+                </div>
         </div>
     </section>
 
-    <!-- NAVIGATION FOOTER -->
     <nav class="bottom-nav" aria-label="Main navigation">
             <a href="../page4/Schedule.html" class="nav-item">
                 <span class="nav-icon nav-calendar"></span>
