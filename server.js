@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import { cloudflareWorkersAdapter } from '@as-integrations/cloudflare-workers';
-import bcrypt from '@node-rs/bcrypt';
+import bcrypt from 'bcryptjs'; // 👈 Swapped back to bcryptjs
+
+
 
 const app = express();
 

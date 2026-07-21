@@ -7,6 +7,9 @@
     "nodejs_compat"
   ],
   "assets": {
-    "directory": "public" 
+    "directory": "public"
+  },
+  "alias": {
+    "bcrypt": "bcryptjs"
   }
 }
