@@ -1,29 +1,32 @@
-const express = require('express');
-
-const cors = require('cors');
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+import express from 'express';
+import cors from 'cors';
+import { createClient } from '@supabase/supabase-js';
+import { cloudflareWorkersAdapter } from '@as-integrations/cloudflare-workers';
+import bcrypt from '@node-rs/bcrypt';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
+
+// Initialize Supabase dynamically using safe Cloudflare Runtime Context
+const getSupabaseClient = (env) => {
+    return createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+};
 
 // Signup endpoint
 app.post('/api/signup', async (req, res) => {
     try {
         const { full_name, email, password } = req.body;
+        const supabaseClient = getSupabaseClient(req.cloudflare.env);
 
-        // Validate input
         if (!full_name || !email || !password) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Sign up user with Supabase Auth
         const { data: signData, error: signError } = await supabaseClient.auth.signUp({
             email: email,
             password: password
@@ -33,10 +36,9 @@ app.post('/api/signup', async (req, res) => {
             return res.status(400).json({ error: signError.message });
         }
 
-        // Insert user profile into database
         const userId = signData.user ? signData.user.id : null;
         if (userId) {
-            const { data: insertData, error: insertError } = await supabaseClient
+            const { error: insertError } = await supabaseClient
                 .from('user-log-in-info')
                 .insert([{
                     id: userId,
@@ -61,13 +63,12 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        const supabaseClient = getSupabaseClient(req.cloudflare.env);
 
-        // Validate input
         if (!email || !password) {
             return res.status(400).json({ error: 'Missing email or password' });
         }
 
-        // Fetch user by email from database
         const { data: users, error: fetchError } = await supabaseClient
             .from('user-log-in-info')
             .select('*')
@@ -78,9 +79,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         const user = users[0];
-
-        // Compare password with hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.verify(password, user.password);
 
         if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
@@ -98,6 +97,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+
+export default {
+    fetch: cloudflareWorkersAdapter(app)
+};
