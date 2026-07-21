@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link class="link" rel="stylesheet" href="Settings.css">
+    <!-- Supabase Configuration -->
+    <script>
+        window.SUPABASE_URL = "https://txfditoxxdjigplckjcc.supabase.co";
+        window.SUPABASE_ANON_KEY = "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script defer src="Settings.js"></script>
+    <link rel="icon" type="image/png" href="../images/web-icon-modified.png">
+</head>
+<body>
+    <div class="page">
+        <header class="top-bar">
+            <a href="../page3/Dashboard.html" class="back-button" aria-label="Back"></a>
+            <h1>Settings</h1>
+        </header>
+        <div class="settings-content">
+            <div class="panel profile-panel">
+                <div class="profile-avatar" id="avatarInitial">U</div>
+                <div class="profile-info">
+                    <h2 id="displayUsername">Loading...</h2>
+                    <p id="displayEmail">Loading...</p>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Log out</button>
+            </div>
+            
+            <div class="panel form-panel">
+                <h2>Username</h2>
+                <div class="field-group">
+                    <div class="field-wrap" id="usernameWrap">
+                        <input type="text" id="usernameInput" placeholder="Enter new username" autocomplete="username">
+                    </div>
+                    <span class="field-error" id="usernameError">Username cannot be empty</span>
+                </div>
+            </div>
+            
+            <div class="panel form-panel">
+                <h2>Change password</h2>
+                <div class="field-group">
+                    <div class="field-wrap" id="curPwWrap">
+                        <input type="password" id="curPw" placeholder="Enter current password">
+                        <button class="eye-btn" onclick="togglePw('curPw', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                    <div class="field-wrap" id="newPwWrap">
+                        <input type="password" id="newPw" placeholder="Enter new password">
+                        <button class="eye-btn" onclick="togglePw('newPw', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                    <div class="field-wrap" id="rePwWrap">
+                        <input type="password" id="rePw" placeholder="Re-enter new password">
+                        <button class="eye-btn" onclick="togglePw('rePw', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                    </div>
+                    <span class="field-error" id="pwError">Passwords do not match</span>
+                </div>
+            </div>
+            <div class="save-row">
+                <button class="save-btn" onclick="handleSave()">Save changes</button>
+            </div>
+        </div>
+        <div id="toast" class="toast"></div>
+
+        <!-- FIX: Added missing bottom navigation -->
+        <nav class="bottom-nav" aria-label="Main navigation">
+            <a href="../page4/Schedule.html" class="nav-item">
+                <span class="nav-icon nav-calendar"></span>
+                <span>Schedule</span>
+            </a>
+            <a href="../page5/Data.html" class="nav-item">
+                <img class="nav-icon nav-image nav-data" src="../images/data-icon.png" alt="Data">
+                <span>Data</span>
+            </a>
+            <a href="../page6/Settings.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

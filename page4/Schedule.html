@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule</title>
+    <!-- Supabase SDK (standard UMD build matching other pages) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <!-- Supabase Credentials -->
+    <script>
+        window.SUPABASE_URL = "https://txfditoxxdjigplckjcc.supabase.co";
+        window.SUPABASE_ANON_KEY = "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
+    </script>
+    <script defer src="Schedule.js"></script>
+    <link rel="stylesheet" href="Schedule.css">
+    <link rel="icon" type="image/png" href="../images/web-icon-modified.png">
+</head>
+<body>
+    <main class="schedule-page">
+        <header class="top-bar">
+            <a href="../page3/Dashboard.html" class="back-button" aria-label="Back to dashboard"></a>
+            <h1>Schedule</h1>
+        </header>
+
+        <section class="toolbar" aria-label="Schedule controls">
+            <div class="month-picker">
+                <button class="month-arrow month-prev" aria-label="Previous month"></button>
+                <span id="monthLabel">Loading...</span>
+                <button class="month-arrow month-next" aria-label="Next month"></button>
+            </div>
+            <label class="search-box">
+                <span class="search-icon" aria-hidden="true"></span>
+                <input type="search" aria-label="Search event or project" placeholder="Search...">
+            </label>
+        </section>
+
+        <section class="calendar" aria-label="Schedule calendar">
+            <div class="calendar-scroll-container">
+                <div class="day-strip"></div>
+                <div class="calendar-grid" aria-label="Calendar events and projects">
+                    <div class="calendar-content"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="editor-sheet" aria-hidden="true">
+            <div class="editor-header">
+                <button class="editor-close" aria-label="Close editor">&#10005;</button>
+                <div class="editor-tabs" role="tablist">
+                    <button class="editor-tab active" type="button" data-type="event" role="tab" aria-selected="true">Event</button>
+                    <button class="editor-tab" type="button" data-type="project" role="tab" aria-selected="false">Project</button>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <button class="editor-delete" type="button" aria-label="Delete item" style="display: none; background-color: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 12px;">Delete</button>
+                    <button class="editor-save" aria-label="Save item">&#10003;</button>
+                </div>
+            </div>
+
+            <div class="editor-content">
+                <!-- EVENT COLUMN -->
+                <div class="editor-column editor-event">
+                    <div class="editor-column-title">Event</div>
+                    <div class="editor-row">
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Event Name</span>
+                                <input type="text" data-field="name">
+                            </label>
+                            <label class="editor-field">
+                                <span>Date</span>
+                                <input type="date" data-field="date">
+                            </label>
+                            <label class="editor-field">
+                                <span>Location</span>
+                                <input type="text" data-field="location">
+                            </label>
+                        </div>
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Event Description</span>
+                                <input type="text" data-field="description">
+                            </label>
+                            <label class="editor-field">
+                                <span>Number of Attendees</span>
+                                <input type="number" data-field="attendees" min="0">
+                            </label>
+                            <label class="editor-field">
+                                <span>Event Category</span>
+                                <input type="text" data-field="category">
+                            </label>
+                        </div>
+                    </div>
+                    <label class="editor-field editor-full">
+                        <span>Additional Notes</span>
+                        <input type="text" data-field="notes">
+                    </label>
+                </div>
+
+                <!-- PROJECT COLUMN -->
+                <div class="editor-column editor-project">
+                    <div class="editor-column-title">Project</div>
+                    <div class="editor-row">
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Project Name</span>
+                                <input type="text" data-field="name">
+                            </label>
+                            <label class="editor-field">
+                                <span>Date Start</span>
+                                <input type="date" data-field="startDate">
+                            </label>
+                            <label class="editor-field">
+                                <span>Project Lead</span>
+                                <input type="text" data-field="lead">
+                            </label>
+                            <label class="editor-field">
+                                <span>Task Status</span>
+                                <select data-field="status">
+                                    <option value="" disabled selected>Select status...</option>
+                                    <option value="To Do">To Do</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Done">Done</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="editor-col">
+                            <label class="editor-field">
+                                <span>Project Description</span>
+                                <input type="text" data-field="description">
+                            </label>
+                            <label class="editor-field">
+                                <span>Date End</span>
+                                <input type="date" data-field="endDate">
+                            </label>
+                            <label class="editor-field">
+                                <span>Priority Level</span>
+                                <select data-field="priority">
+                                    <option value="" disabled selected>Select priority...</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </label>
+                            <label class="editor-field">
+                                <span>Belongs to Master Project (Optional)</span>
+                                <select id="project-parent-select">
+                                    <option value="">None (Is a Master Project)</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    <label class="editor-field">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span>Assign to</span>
+                            <button type="button" id="select-all-btn" class="select-all-btn">Select All</button>
+                        </div>
+                        <div class="assignee-container">
+                            <div id="assignee-chips" class="chip-container"></div>
+                            <input type="text" id="assignee-input" list="user-list" placeholder="Search and select users..." autocomplete="off">
+                            <input type="hidden" data-field="assignee" id="hidden-assignee">
+                        </div>
+                        <datalist id="user-list">
+                            <!-- Users populated from Supabase -->
+                        </datalist>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <button class="add-button" aria-label="Add project or event">+</button>
+
+        <nav class="bottom-nav" aria-label="Main navigation">
+            <a href="#" class="nav-item active">
+                <span class="nav-icon nav-calendar"></span>
+                <span>Schedule</span>
+            </a>
+            <a href="../page5/Data.html" class="nav-item">
+                <img class="nav-icon nav-image nav-data" src="../images/data-icon.png" alt="Data">
+                <span>Data</span>
+            </a>
+            <a href="../page6/Settings.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </main>
+</body>
+</html>
