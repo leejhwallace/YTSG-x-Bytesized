@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
-import * as cfAdapter from '@as-integrations/cloudflare-workers';
+
 import bcrypt from 'bcryptjs';
 
 
@@ -106,6 +106,3 @@ export default {
 
 
 
-export default {
-    fetch: cfAdapter.cloudflareWorkersAdapter(app)
-};
