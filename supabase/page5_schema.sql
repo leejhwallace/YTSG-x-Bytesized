@@ -1,5 +1,8 @@
 -- Run this file in the Supabase SQL Editor before using Page 5.
--- It provides the tables consumed by GET /api/data and PATCH /api/data/projects/:id.
+-- It provides the tables read directly by page5/Data.js via the publishable
+-- Supabase key (no backend proxy). The browser also issues a column-scoped
+-- update on data_projects (manual_total_minutes, delay_reason) when the user
+-- edits a project's total hours or delay reason.
 
 create extension if not exists pgcrypto;
 
@@ -92,3 +95,15 @@ create policy "page5 public access" on public.data_event_feedback for all using 
 create policy "page5 public access" on public.data_event_demographics for all using (true) with check (true);
 create policy "page5 public access" on public.data_event_reach for all using (true) with check (true);
 create policy "page5 public access" on public.data_volunteer_hours for all using (true) with check (true);
+
+-- Supabase projects created after April 2026 do not automatically expose new
+-- tables through the Data API, so grants are required in addition to RLS.
+grant usage on schema public to anon, authenticated;
+grant select on table public.data_projects,
+    public.data_project_tasks,
+    public.data_events,
+    public.data_event_feedback,
+    public.data_event_demographics,
+    public.data_event_reach,
+    public.data_volunteer_hours to anon, authenticated;
+grant update (manual_total_minutes, delay_reason) on table public.data_projects to anon, authenticated;

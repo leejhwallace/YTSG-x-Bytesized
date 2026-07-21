@@ -1,281 +1,731 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Safe initialization of Supabase client
+    let supabaseClient = null;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    } else {
+        console.warn("Supabase client not loaded; aborting page 5 init.");
+        return;
+    }
+
+    // Auth gate: read queries (Project, Event, etc.) are protected by RLS that requires a user JWT.
+    // Redirect to sign-in when there's no active session so the search can actually match rows.
+    const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+    if (!authData?.user || authError) {
+        console.warn("No active Supabase session on page 5; redirecting to Get Started.");
+        window.location.replace('../page1/Get_Started.html');
+        return;
+    }
+
     const searchInput = document.getElementById('dataSearch');
-    const views = document.querySelectorAll('.data-view');
-    const noResultsMessage = document.getElementById('noResultsMessage');
-    const palette = ['#6c9aea', '#f3b342', '#df5128', '#4fae5e', '#9274c8'];
-    const state = {
-        data: null,
-        selectedProject: null,
-        selectedEvent: null,
-    };
+    const viewOverview = document.getElementById('viewOverview');
+    const viewProject = document.getElementById('viewProject');
+    const viewEvent = document.getElementById('viewEvent');
+        
+    let currentSearchedProject = "";
+    let currentSearchedEvent = "";
+    let currentActiveStatTarget = "";
 
-    const setView = (name) => views.forEach((view) => view.classList.toggle('active', view.dataset.view === name));
-    const createElement = (tag, text, className) => {
-        const element = document.createElement(tag);
-        if (text !== undefined) element.textContent = text;
-        if (className) element.className = className;
-        return element;
-    };
-    const clear = (element) => element.replaceChildren();
-    const percentage = (value, total) => total ? `${((value / total) * 100).toFixed(1).replace(/\.0$/, '')}%` : '0%';
-    const formatDate = (value) => value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-GB') : '—';
-    const formatMinutes = (minutes) => {
-        const value = Number(minutes) || 0;
-        const hours = Math.floor(value / 60);
-        const remainder = value % 60;
-        if (!hours) return `${remainder} min`;
-        return `${hours} hour${hours === 1 ? '' : 's'}${remainder ? ` ${remainder} min` : ''}`;
-    };
-    const matching = (item, term) => `${item.name || ''} ${item.description || ''}`.toLowerCase().includes(term);
+    // Full-row records from the matched search; used to render the entity info header.
+    let currentProjectInfo = null;
+    let currentEventInfo = null;
 
-    const renderDonut = (element, values, colors) => {
-        const total = values.reduce((sum, value) => sum + value, 0);
-        if (!total) {
-            element.style.background = '#8f8f8f';
+    // Fallbacks pulled from the DB at init, so we never hardcode 'Project 1' / 'Event 1'
+    let defaultProject = "Default Project";
+    let defaultEvent = "Default Event";
+
+    async function fetchDefaults() {
+        if (!supabaseClient) return;
+        try {
+            const { data: pData } = await supabaseClient
+                .from('Project').select('project_name')
+                .order('starting_date', { ascending: false })
+                .limit(1);
+            if (pData && pData.length > 0 && pData[0].project_name) {
+                defaultProject = pData[0].project_name;
+            }
+
+            const { data: eData } = await supabaseClient
+                .from('Event').select('event_name')
+                .order('date_of_event', { ascending: false })
+                .limit(1);
+            if (eData && eData.length > 0 && eData[0].event_name) {
+                defaultEvent = eData[0].event_name;
+            }
+        } catch (err) {
+            console.warn("fetchDefaults failed; staying on initial fallbacks:", err.message);
+        }
+    }
+
+    // Cache values for turnout graph
+    let turnoutCache = { workshop: 30, outreach: 50, fundraiser: 20 };
+
+    const donutChart = document.getElementById('overviewDonutChart');
+    const lblWorkshop = document.getElementById('lblWorkshop');
+    const lblOutreach = document.getElementById('lblOutreach');
+    const lblFundraiser = document.getElementById('lblFundraiser');
+
+    // Render turnout graph from raw values
+    function renderTurnoutGraph(workshopVal, outreachVal, fundraiserVal) {
+        turnoutCache = { workshop: workshopVal, outreach: outreachVal, fundraiser: fundraiserVal };
+        const total = workshopVal + outreachVal + fundraiserVal;
+
+        if (total === 0) {
+            if (donutChart) donutChart.style.background = '#ccc';
+            if (lblWorkshop) lblWorkshop.textContent = "Workshop ~ 0%";
+            if (lblOutreach) lblOutreach.textContent = "Community Outreach ~ 0%";
+            if (lblFundraiser) lblFundraiser.textContent = "Fundraiser ~ 0%";
             return;
         }
-        let start = 0;
-        element.style.background = `conic-gradient(${values.map((value, index) => {
-            const end = start + (value / total) * 100;
-            const segment = `${colors[index % colors.length]} ${start}% ${end}%`;
-            start = end;
-            return segment;
-        }).join(', ')})`;
-    };
 
-    const renderOverview = () => {
-        const { events, volunteerHours } = state.data;
-        const typeTotals = new Map();
-        events.forEach((event) => {
-            const type = event.event_type || 'Other';
-            typeTotals.set(type, (typeTotals.get(type) || 0) + Number(event.attendee_count || 0));
-        });
-        const types = [...typeTotals.entries()].sort((a, b) => b[1] - a[1]);
-        renderDonut(document.getElementById('eventTypeDonut'), types.map(([, count]) => count), palette);
-        const legend = document.getElementById('eventTypeLegend');
-        clear(legend);
-        const typeTotal = types.reduce((sum, [, count]) => sum + count, 0);
-        if (!types.length) legend.append(createElement('p', 'No event data yet'));
-        types.forEach(([type, count], index) => {
-            const item = createElement('p', `${type} ~ ${percentage(count, typeTotal)}`);
-            item.style.color = palette[index % palette.length];
-            legend.append(item);
-        });
+        const pctWorkshop = Math.round((workshopVal / total) * 100);
+        const pctOutreach = Math.round((outreachVal / total) * 100);
+        const pctFundraiser = 100 - (pctWorkshop + pctOutreach);
 
-        const monthly = new Map();
-        events.forEach((event) => {
-            if (!event.event_date) return;
-            const month = event.event_date.slice(0, 7);
-            monthly.set(month, (monthly.get(month) || 0) + 1);
-        });
-        const barValues = [...monthly.entries()].sort(([a], [b]) => a.localeCompare(b)).slice(-12);
-        const largest = Math.max(...barValues.map(([, value]) => value), 1);
-        const bars = document.getElementById('eventGrowthBars');
-        clear(bars);
-        barValues.forEach(([month, value]) => {
-            const bar = createElement('div', undefined, 'bar');
-            bar.style.height = `${Math.max(4, (value / largest) * 100)}%`;
-            bar.title = `${month}: ${value} event${value === 1 ? '' : 's'}`;
-            bars.append(bar);
-        });
+        const stop1 = pctWorkshop;
+        const stop2 = pctWorkshop + pctOutreach;
 
-        const eventRows = document.getElementById('overviewEvents');
-        clear(eventRows);
-        events.slice(0, 12).forEach((event) => {
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            nameCell.append(createElement('span', event.name || 'Untitled event'));
-            if (event.description) nameCell.append(document.createElement('br'), createElement('span', event.description, 'sub'));
-            row.append(nameCell, createElement('td', String(event.attendee_count || 0)), createElement('td', event.event_type || 'Other'));
-            eventRows.append(row);
-        });
-        if (!events.length) eventRows.append(emptyRow(3, 'No events have been added yet.'));
-
-        const totalsByVolunteer = new Map();
-        volunteerHours.forEach((entry) => {
-            const key = `${entry.volunteer_name || 'Unknown'}\u0000${entry.department || ''}`;
-            totalsByVolunteer.set(key, (totalsByVolunteer.get(key) || 0) + Number(entry.hours || 0));
-        });
-        const volunteers = [...totalsByVolunteer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
-        const volunteerRows = document.getElementById('overviewVolunteers');
-        clear(volunteerRows);
-        volunteers.forEach(([key, hours]) => {
-            const [name, department] = key.split('\u0000');
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            nameCell.append(createElement('span', name));
-            if (department) nameCell.append(document.createElement('br'), createElement('span', department, 'sub'));
-            row.append(nameCell, createElement('td', `${hours.toFixed(2).replace(/\.00$/, '')} hrs`));
-            volunteerRows.append(row);
-        });
-        if (!volunteers.length) volunteerRows.append(emptyRow(2, 'No volunteer hours have been logged yet.'));
-    };
-
-    const emptyRow = (columns, message) => {
-        const row = document.createElement('tr');
-        const cell = createElement('td', message, 'sub');
-        cell.colSpan = columns;
-        row.append(cell);
-        return row;
-    };
-
-    const renderProject = (project) => {
-        state.selectedProject = project;
-        const tasks = state.data.projectTasks.filter((task) => task.project_id === project.id);
-        const calculatedMinutes = tasks.reduce((total, task) => total + Number(task.duration_minutes || 0), 0);
-        const totalMinutes = project.manual_total_minutes ?? calculatedMinutes;
-        document.getElementById('projectTotalHours').textContent = formatMinutes(totalMinutes);
-        document.getElementById('projectDelayReason').textContent = project.delay_reason || 'No delays recorded.';
-        const rows = document.getElementById('projectTasks');
-        clear(rows);
-        tasks.forEach((task) => {
-            const row = document.createElement('tr');
-            row.append(
-                createElement('td', task.task_name || 'Untitled task'),
-                createElement('td', formatMinutes(task.duration_minutes)),
-                createElement('td', task.completed_by || '—'),
-                createElement('td', formatDate(task.completed_at)),
-            );
-            rows.append(row);
-        });
-        if (!tasks.length) rows.append(emptyRow(4, 'No tasks have been logged for this project.'));
-    };
-
-    const renderEvent = (event) => {
-        state.selectedEvent = event;
-        const feedback = state.data.feedback.filter((entry) => entry.event_id === event.id);
-        const ratings = [5, 4, 3, 2, 1].map((rating) => feedback.filter((entry) => Number(entry.rating) === rating).length);
-        renderDonut(document.getElementById('ratingDonut'), ratings, ['#f3b342', '#6c9aea', '#4fae5e', '#df5128', '#9274c8']);
-        const ratingLabels = document.getElementById('ratingLabels');
-        clear(ratingLabels);
-        const feedbackTotal = ratings.reduce((sum, value) => sum + value, 0);
-        ratings.forEach((count, index) => {
-            const label = createElement('p', `${5 - index} Stars ~ ${percentage(count, feedbackTotal)}`);
-            label.style.color = ['#f3b342', '#6c9aea', '#4fae5e', '#df5128', '#9274c8'][index];
-            ratingLabels.append(label);
-        });
-
-        const demographics = state.data.demographics.filter((entry) => entry.event_id === event.id);
-        const demographicsByGroup = new Map();
-        demographics.forEach((entry) => {
-            const current = demographicsByGroup.get(entry.age_group) || { first: 0, returning: 0 };
-            current[entry.is_first_timer ? 'first' : 'returning'] += Number(entry.attendee_count || 0);
-            demographicsByGroup.set(entry.age_group, current);
-        });
-        const barContainer = document.getElementById('demographicBars');
-        clear(barContainer);
-        const groupLabels = { children: 'children (3-12)', teenagers: 'teenagers (13-19)', adults: 'adults (20-39)' };
-        Object.entries(groupLabels).forEach(([group, label]) => {
-            const counts = demographicsByGroup.get(group) || { first: 0, returning: 0 };
-            const total = counts.first + counts.returning;
-            const col = createElement('div', undefined, 'demo-col');
-            const stack = createElement('div', undefined, 'demo-group');
-            stack.style.height = `${Math.max(12, Math.min(55, total * 2))}px`;
-            const first = createElement('span', percentage(counts.first, total), 'demo-seg seg-orange');
-            const returning = createElement('span', percentage(counts.returning, total), 'demo-seg seg-yellow');
-            first.style.flex = String(counts.first || 0.001);
-            returning.style.flex = String(counts.returning || 0.001);
-            stack.append(first, returning);
-            col.append(stack, createElement('span', label, 'demo-label'));
-            barContainer.append(col);
-        });
-        const allDemographics = demographics.reduce((sum, entry) => sum + Number(entry.attendee_count || 0), 0);
-        const firstTimers = demographics.filter((entry) => entry.is_first_timer).reduce((sum, entry) => sum + Number(entry.attendee_count || 0), 0);
-        const key = document.getElementById('demographicKey');
-        clear(key);
-        key.append(createElement('p', `First timers ~ ${percentage(firstTimers, allDemographics)}`, 'demo-key first-timer'));
-        key.append(createElement('p', `Returning ~ ${percentage(allDemographics - firstTimers, allDemographics)}`, 'demo-key returning'));
-
-        const volunteers = Number(event.volunteer_count || 0);
-        const attendees = Number(event.attendee_count || 0);
-        const difference = volunteers - attendees;
-        document.getElementById('volunteerHeadcount').textContent = volunteers;
-        document.getElementById('volunteerHeadcountPct').textContent = volunteers ? '100%' : '0%';
-        document.getElementById('attendeeHeadcount').textContent = attendees;
-        document.getElementById('attendeeHeadcountPct').textContent = percentage(attendees, volunteers);
-        document.getElementById('headcountDifference').textContent = difference;
-        document.getElementById('headcountDifferencePct').textContent = percentage(Math.abs(difference), volunteers);
-
-        const reach = state.data.reach.filter((entry) => entry.event_id === event.id);
-        const sources = ['Word of Mouth', 'Website', 'Social Media'];
-        const reaches = sources.map((source) => reach.filter((entry) => entry.source === source).reduce((sum, entry) => sum + Number(entry.reach_count || 0), 0));
-        const reachTotal = reaches.reduce((sum, value) => sum + value, 0);
-        ['reachWord', 'reachWebsite', 'reachSocial'].forEach((id, index) => { document.getElementById(id).style.flex = String(reaches[index] || 0.001); });
-        ['reachWordLabel', 'reachWebsiteLabel', 'reachSocialLabel'].forEach((id, index) => { document.getElementById(id).textContent = `${sources[index]} ~ ${percentage(reaches[index], reachTotal)}`; });
-    };
-
-    const updateViewForSearch = () => {
-        const term = searchInput.value.trim().toLowerCase();
-        if (!term) return setView('overview');
-        const project = state.data.projects.find((item) => matching(item, term));
-        const event = state.data.events.find((item) => matching(item, term));
-        if (project) {
-            renderProject(project);
-            return setView('project');
+        if (donutChart) {
+            donutChart.style.background = `conic-gradient(
+                var(--yellow) 0% ${stop1}%,
+                var(--blue) ${stop1}% ${stop2}%,
+                var(--orange) ${stop2}% 100%
+            )`;
         }
-        if (event) {
-            renderEvent(event);
-            return setView('event');
+
+        if (lblWorkshop) lblWorkshop.textContent = `Workshop ~ ${pctWorkshop}% (${workshopVal})`;
+        if (lblOutreach) lblOutreach.textContent = `Community Outreach ~ ${pctOutreach}% (${outreachVal})`;
+        if (lblFundraiser) lblFundraiser.textContent = `Fundraiser ~ ${pctFundraiser}% (${fundraiserVal})`;
+    }
+
+    // Load persisted turnout counts from database
+    async function loadTurnoutFromDB() {
+        if (!supabaseClient) {
+            renderTurnoutGraph(30, 50, 20);
+            return;
         }
-        noResultsMessage.textContent = `No event or project matches “${searchInput.value.trim()}”.`;
-        setView('none');
-    };
-
-    const saveProject = async (changes) => {
-        if (!state.selectedProject) return;
-        const response = await fetch(`/api/data/projects/${encodeURIComponent(state.selectedProject.id)}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(changes),
-        });
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || 'Unable to save the project.');
-        await loadData();
-    };
-
-    document.querySelector('.project-hours .edit-button').addEventListener('click', async () => {
-        if (!state.selectedProject) return;
-        const current = state.selectedProject.manual_total_minutes ?? state.data.projectTasks
-            .filter((task) => task.project_id === state.selectedProject.id)
-            .reduce((total, task) => total + Number(task.duration_minutes || 0), 0);
-        const value = window.prompt('Total time spent (whole minutes):', current);
-        if (value === null) return;
         try {
-            await saveProject({ totalMinutes: value.trim() });
-        } catch (error) {
-            window.alert(error.message);
+            const { data, error } = await supabaseClient.from('Event_Turnout').select('*');
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                const wObj = data.find(item => item.event_type === 'Workshop');
+                const oObj = data.find(item => item.event_type === 'Community Outreach');
+                const fObj = data.find(item => item.event_type === 'Fundraiser');
+
+                const wVal = wObj ? wObj.headcount : 30;
+                const oVal = oObj ? oObj.headcount : 50;
+                const fVal = fObj ? fObj.headcount : 20;
+
+                renderTurnoutGraph(wVal, oVal, fVal);
+            } else {
+                renderTurnoutGraph(30, 50, 20);
+            }
+        } catch (err) {
+            console.warn("Could not load turnout from DB, using fallback defaults:", err.message);
+            renderTurnoutGraph(30, 50, 20);
         }
+    }
+
+    // Render Month-on-Month Growth Bar Chart using Participant Counts from Event Table
+    function renderMonthGrowthChart(eventsList) {
+        const barChartContainer = document.getElementById('monthGrowthBarChart');
+        if (!barChartContainer) return;
+
+        // 12 Months participant accumulator (0 = Jan, 11 = Dec)
+        const monthlyParticipants = new Array(12).fill(0);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        (eventsList || []).forEach(e => {
+            if (!e.date_of_event) return;
+            const parts = String(e.date_of_event).split('T')[0].split('-');
+            if (parts.length < 2) return;
+            
+            const monthIndex = parseInt(parts[1], 10) - 1; // 0-indexed month
+            if (monthIndex >= 0 && monthIndex < 12) {
+                const count = (e.number_of_attendees && typeof e.number_of_attendees === 'object') 
+                    ? (parseInt(e.number_of_attendees.count, 10) || 0) 
+                    : (parseInt(e.number_of_attendees, 10) || 0);
+                monthlyParticipants[monthIndex] += count;
+            }
+        });
+
+        const maxParticipants = Math.max(...monthlyParticipants, 1); // Avoid division by 0
+
+        barChartContainer.innerHTML = '';
+        monthlyParticipants.forEach((total, idx) => {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            
+            // Height proportional to maximum participants across months (min 8% height for visibility)
+            const calculatedPct = total > 0 ? Math.max(8, Math.round((total / maxParticipants) * 100)) : 5;
+            bar.style.height = `${calculatedPct}%`;
+            bar.title = `${monthNames[idx]}: ${total} participants`;
+            
+            barChartContainer.appendChild(bar);
+        });
+    }
+
+    // Switch View Panel Visibility
+    function switchActiveView(targetPanel) {
+        [viewOverview, viewProject, viewEvent].forEach(panel => {
+            if(panel) panel.classList.remove('active');
+        });
+        if(targetPanel) targetPanel.classList.add('active');
+    }
+
+    // --- Entity info header helpers ---
+    function formatDateLabel(dateStr) {
+        if (!dateStr) return '';
+        const parts = String(dateStr).split('T')[0].split('-');
+        if (parts.length !== 3) return dateStr;
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function renderProjectInfo(row) {
+        const header = document.getElementById('projectInfoHeader');
+        const nameEl = document.getElementById('projectInfoName');
+        const descEl = document.getElementById('projectInfoDesc');
+        const metaEl = document.getElementById('projectInfoMeta');
+        if (!header || !nameEl || !descEl || !metaEl) return;
+        if (!row) { header.hidden = true; return; }
+        nameEl.textContent = row.project_name || '';
+        descEl.textContent = row.project_discription || '';
+        const meta = [];
+        if (row.pirority) meta.push(`Priority: ${row.pirority}`);
+        if (row.status) meta.push(`Status: ${row.status}`);
+        if (row.project_lead) meta.push(`Lead: ${row.project_lead}`);
+        if (row.starting_date) meta.push(`Start: ${formatDateLabel(row.starting_date)}`);
+        if (row.ending_date) meta.push(`Due: ${formatDateLabel(row.ending_date)}`);
+        metaEl.textContent = meta.join('  •  ');
+        header.hidden = false;
+    }
+
+    function renderEventInfo(row) {
+        const header = document.getElementById('eventInfoHeader');
+        const nameEl = document.getElementById('eventInfoName');
+        const descEl = document.getElementById('eventInfoDesc');
+        const metaEl = document.getElementById('eventInfoMeta');
+        if (!header || !nameEl || !descEl || !metaEl) return;
+        if (!row) { header.hidden = true; return; }
+        nameEl.textContent = row.event_name || '';
+        descEl.textContent = row.event_discription || '';
+        const meta = [];
+        if (row.date_of_event) meta.push(`Date: ${formatDateLabel(row.date_of_event)}`);
+        if (row.location) meta.push(`Location: ${row.location}`);
+        if (row.event_catergory) meta.push(`Category: ${row.event_catergory}`);
+        metaEl.textContent = meta.join('  •  ');
+        header.hidden = false;
+    }
+
+    function showNoMatchHint(query) {
+        const hint = document.getElementById('searchHint');
+        if (!hint) return;
+        hint.textContent = `No event or project matches “${query}”.`;
+        hint.hidden = false;
+    }
+
+    function clearNoMatchHint() {
+        const hint = document.getElementById('searchHint');
+        if (hint) hint.hidden = true;
+    }
+
+    // View Routing Core Switch Logic
+    async function evaluateNavigationRoute() {
+        if (!searchInput) return;
+        const query = searchInput.value.trim();
+        clearNoMatchHint();
+
+        // Empty input -> clear cached entity and return to default (overview) page.
+        if (!query) {
+            currentSearchedProject = '';
+            currentSearchedEvent = '';
+            currentProjectInfo = null;
+            currentEventInfo = null;
+            renderProjectInfo(null);
+            renderEventInfo(null);
+            switchActiveView(viewOverview);
+            return;
+        }
+
+        const needle = query.toLowerCase();
+        try {
+            const projectCols = 'project_name, project_discription, starting_date, ending_date, project_lead, pirority, status';
+            const eventCols = 'event_name, event_discription, date_of_event, location, event_catergory';
+            const [projectsRes, eventsRes] = await Promise.all([
+                supabaseClient.from('Project').select(projectCols),
+                supabaseClient.from('Event').select(eventCols)
+            ]);
+
+            const projectMatch = (projectsRes.data || [])
+                .find(p => String(p.project_name || '').toLowerCase().includes(needle));
+            const eventMatch = (eventsRes.data || [])
+                .find(e => String(e.event_name || '').toLowerCase().includes(needle));
+
+            if (projectMatch) {
+                currentSearchedProject = projectMatch.project_name || defaultProject;
+                currentProjectInfo = projectMatch;
+                currentSearchedEvent = '';
+                currentEventInfo = null;
+                renderEventInfo(null);
+                renderProjectInfo(currentProjectInfo);
+                await loadProjectDataMetrics(currentSearchedProject);
+                switchActiveView(viewProject);
+                return;
+            }
+
+            if (eventMatch) {
+                currentSearchedEvent = eventMatch.event_name || defaultEvent;
+                currentEventInfo = eventMatch;
+                currentSearchedProject = '';
+                currentProjectInfo = null;
+                renderProjectInfo(null);
+                renderEventInfo(currentEventInfo);
+                await loadEventStatistics(currentSearchedEvent);
+                switchActiveView(viewEvent);
+                return;
+            }
+
+            // No match -> fall back to default page with a visible hint.
+            currentSearchedProject = '';
+            currentSearchedEvent = '';
+            currentProjectInfo = null;
+            currentEventInfo = null;
+            renderProjectInfo(null);
+            renderEventInfo(null);
+            showNoMatchHint(query);
+            switchActiveView(viewOverview);
+        } catch (e) {
+            console.error("Navigation evaluation error:", e);
+            switchActiveView(viewOverview);
+        }
+    }
+
+    // REGEX-BASED TASK DURATION PARSER & HOOK SUMMATION
+    function parseAndSumHours(tasksList) {
+        let totalMinutes = 0;
+        tasksList.forEach(t => {
+            const timeStr = String(t.hours_spent).toLowerCase();
+            const hourMatch = timeStr.match(/(\d+)\s*h/);
+            const minMatch = timeStr.match(/(\d+)\s*m/);
+            const hours = hourMatch ? parseInt(hourMatch[1], 10) : 0;
+            const minutes = minMatch ? parseInt(minMatch[1], 10) : 0;
+            totalMinutes += (hours * 60) + minutes;
+        });
+
+        const calculatedHours = Math.floor(totalMinutes / 60);
+        const calculatedMinutes = totalMinutes % 60;
+        const totalEl = document.getElementById('projectHoursTotal');
+        if (totalEl) totalEl.textContent = `${calculatedHours} Hours ${calculatedMinutes}min`;
+    }
+
+    // Load Project Data from Tables
+    async function loadProjectDataMetrics(projectName) {
+        if (!supabaseClient) return;
+        try {
+            const [tasksRes, delaysRes] = await Promise.all([
+                supabaseClient.from('Project_Tasks').select('*').eq('project_name', projectName),
+                supabaseClient.from('Project_Delays').select('*').eq('project_name', projectName)
+            ]);
+
+            const taskContainer = document.getElementById('projectTaskBody');
+            if (taskContainer) {
+                taskContainer.innerHTML = '';
+                const tasks = tasksRes.data || [];
+                
+                tasks.forEach(t => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${t.task_title}</td><td>${t.hours_spent}</td><td>${t.who_completed}</td><td>${t.when_completed}</td>`;
+                    taskContainer.appendChild(tr);
+                });
+
+                parseAndSumHours(tasks);
+            }
+
+            const delayContainer = document.getElementById('projectDelayBody');
+            if (delayContainer) {
+                delayContainer.innerHTML = '';
+                (delaysRes.data || []).forEach(d => {
+                    const li = document.createElement('li');
+                    li.textContent = d.delay_reason;
+                    delayContainer.appendChild(li);
+                });
+            }
+        } catch (e) {
+            console.error("Project data load error:", e);
+        }
+    }
+
+    // Load Event Analytical Layouts & Update Graphs
+    async function loadEventStatistics(eventName) {
+        if (!supabaseClient) return;
+        try {
+            let { data, error } = await supabaseClient.from('Event_Stats').select('*').eq('event_name', eventName).maybeSingle();
+            
+            if (!data) {
+                const baseline = { event_name: eventName, stars_5: 40, stars_4: 30, stars_3: 20, stars_2: 10, child_orange: 20, child_yellow: 80, teen_orange: 60, teen_yellow: 40, adult_orange: 5, adult_yellow: 95, first_timers: 28, returning_pct: 72, volunteer_count: 130, attendee_count: 95, reach_word: 50, reach_website: 10, reach_social: 40 };
+                await supabaseClient.from('Event_Stats').insert([baseline]);
+                data = baseline;
+            }
+
+            const ratingLabels = document.getElementById('eventRatingLabels');
+            const ratingDonut = document.getElementById('eventRatingDonut');
+            if (ratingLabels) {
+                ratingLabels.innerHTML = `
+                    <p class="rating-five">5 Stars ~ ${data.stars_5}%</p><p class="rating-four">4 Stars ~ ${data.stars_4}%</p>
+                    <p class="rating-three">3 Stars ~ ${data.stars_3}%</p><p class="rating-two">2 Stars ~ ${data.stars_2}%</p>
+                `;
+            }
+            if (ratingDonut) {
+                ratingDonut.style.background = `conic-gradient(
+                    var(--orange) 0% ${data.stars_5}%,
+                    var(--yellow) ${data.stars_5}% ${data.stars_5 + data.stars_4}%,
+                    var(--blue) ${data.stars_5 + data.stars_4}% ${data.stars_5 + data.stars_4 + data.stars_3}%,
+                    #4fae5e ${data.stars_5 + data.stars_4 + data.stars_3}% 100%
+                )`;
+            }
+
+            const barChild = document.getElementById('barChild');
+            const barTeen = document.getElementById('barTeen');
+            const barAdult = document.getElementById('barAdult');
+            const demoKeyLabels = document.getElementById('demoKeyLabels');
+            if (barChild) barChild.innerHTML = `<span class="demo-seg seg-orange" style="height:${data.child_orange}%;">${data.child_orange}%</span><span class="demo-seg seg-yellow" style="height:${data.child_yellow}%;">${data.child_yellow}%</span>`;
+            if (barTeen) barTeen.innerHTML = `<span class="demo-seg seg-orange" style="height:${data.teen_orange}%;">${data.teen_orange}%</span><span class="demo-seg seg-yellow" style="height:${data.teen_yellow}%;">${data.teen_yellow}%</span>`;
+            if (barAdult) barAdult.innerHTML = `<span class="demo-seg seg-orange" style="height:${data.adult_orange}%;">${data.adult_orange}%</span><span class="demo-seg seg-yellow" style="height:${data.adult_yellow}%;">${data.adult_yellow}%</span>`;
+            if (demoKeyLabels) demoKeyLabels.innerHTML = `<p class="demo-key first-timer">First timers ~ ${data.first_timers}%</p><p class="demo-key returning">Returning ~ ${data.returning_pct}%</p>`;
+
+            const lblVol = document.getElementById('lblVolHeadcount');
+            const lblAtt = document.getElementById('lblAttHeadcount');
+            const lblDiff = document.getElementById('lblDiffHeadcount');
+            if (lblVol) lblVol.textContent = data.volunteer_count;
+            if (lblAtt) lblAtt.textContent = data.attendee_count;
+            if (lblDiff) lblDiff.textContent = Math.abs(data.volunteer_count - data.attendee_count);
+
+            const barReachWord = document.getElementById('barReachWord');
+            const barReachWeb = document.getElementById('barReachWeb');
+            const barReachSocial = document.getElementById('barReachSocial');
+            const reachLabelsContainer = document.getElementById('reachLabelsContainer');
+            if (barReachWord) barReachWord.style.height = `${data.reach_word}%`;
+            if (barReachWeb) barReachWeb.style.height = `${data.reach_website}%`;
+            if (barReachSocial) barReachSocial.style.height = `${data.reach_social}%`;
+            if (reachLabelsContainer) {
+                reachLabelsContainer.innerHTML = `
+                    <p class="word">Word of Mouth ~ ${data.reach_word}%</p>
+                    <p class="website">Website ~ ${data.reach_website}%</p>
+                    <p class="social">Social Media ~ ${data.reach_social}%</p>
+                `;
+            }
+        } catch (e) {
+            console.error("Event stats load error:", e);
+        }
+    }
+
+    // Load Overview Global Metrics & Render Growth Bar Chart
+    async function loadOverviewGlobalMetrics() {
+        if (!supabaseClient) return;
+        try {
+            const [logsRes, profilesRes, eventsRes] = await Promise.all([
+                supabaseClient.from('volunteer_hour_logs').select('volunteer_name, hours_logged'),
+                supabaseClient.from('profiles').select('display_name, department'),
+                supabaseClient.from('Event').select('*')
+            ]);
+
+            const volunteerAggregates = {};
+            (logsRes.data || []).forEach(log => {
+                const name = log.volunteer_name || "Unknown Volunteer";
+                const hours = parseFloat(log.hours_logged) || 0;
+                volunteerAggregates[name] = (volunteerAggregates[name] || 0) + hours;
+            });
+
+            const profileMap = {};
+            (profilesRes.data || []).forEach(p => {
+                if (p.display_name) {
+                    profileMap[p.display_name] = p.department || 'Volunteer';
+                }
+            });
+
+            const leaderboard = Object.keys(volunteerAggregates).map(name => ({
+                name: name,
+                hours: volunteerAggregates[name],
+                department: profileMap[name] || 'Volunteer'
+            })).sort((a, b) => b.hours - a.hours);
+
+            const volunteerTableBody = document.getElementById('volunteerTableBody');
+            if (volunteerTableBody) {
+                volunteerTableBody.innerHTML = '';
+                if (leaderboard.length === 0) {
+                    volunteerTableBody.innerHTML = '<tr><td colspan="2" style="text-align:center; opacity:0.5; padding: 20px 0;">No hours logged yet.</td></tr>';
+                } else {
+                    leaderboard.forEach(v => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${v.name}<br><span class="sub">${v.department}</span></td>
+                            <td style="text-align: right; font-size: 18px; font-weight: 800;">${v.hours}</td>
+                        `;
+                        volunteerTableBody.appendChild(tr);
+                    });
+                }
+            }
+
+            const eventsList = eventsRes.data || [];
+            const eventTableBody = document.getElementById('eventTableBody');
+            if (eventTableBody) {
+                eventTableBody.innerHTML = '';
+                if (eventsList.length === 0) {
+                    eventTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; opacity:0.5; padding: 20px 0;">No events recorded yet.</td></tr>';
+                }
+                eventsList.forEach(e => {
+                    const tr = document.createElement('tr');
+                    const count = (e.number_of_attendees && typeof e.number_of_attendees === 'object') ? (e.number_of_attendees.count || 0) : (e.number_of_attendees || 0);
+                    tr.innerHTML = `
+                        <td>${e.event_name || 'Unnamed'}<br><span class="sub">${e.event_discription || ''}</span></td>
+                        <td>${count}</td>
+                        <td>${e.event_catergory || 'General'}</td>
+                    `;
+                    eventTableBody.appendChild(tr);
+                });
+            }
+
+            // Calculate monthly participant totals and render the growth bar chart
+            renderMonthGrowthChart(eventsList);
+
+        } catch (err) {
+            console.error("Overview metrics engine failed:", err.message);
+        }
+    }
+
+    // CLICK TO INTERACT STATS CONTEXT FIELDS DEFINITIONS
+    document.querySelectorAll('.clickable-stat').forEach(element => {
+        element.addEventListener('click', () => {
+            const target = element.getAttribute('data-target');
+            // Project panels reuse the existing add-task / add-delay modals
+            // (mirrors how the events panels open their per-panel stats editor).
+            if (target === 'project-tasks') { openModalDirectly('taskModal'); return; }
+            if (target === 'project-delays') { openModalDirectly('delayModal'); return; }
+            currentActiveStatTarget = target;
+            buildDynamicStatsEditor(target);
+        });
     });
-    document.querySelector('.project-reasons .edit-button').addEventListener('click', async () => {
-        if (!state.selectedProject) return;
-        const value = window.prompt('Reason for delays:', state.selectedProject.delay_reason || '');
-        if (value === null) return;
-        try {
-            await saveProject({ delayReason: value });
-        } catch (error) {
-            window.alert(error.message);
-        }
-    });
 
-    const loadData = async () => {
-        searchInput.placeholder = 'Loading data…';
-        searchInput.disabled = true;
-        try {
-            const response = await fetch('/api/data');
-            const body = await response.json();
-            if (!response.ok) throw new Error(body.error || 'Unable to load Page 5 data.');
-            state.data = body;
-            renderOverview();
-            updateViewForSearch();
-        } catch (error) {
-            noResultsMessage.textContent = error.message;
-            setView('none');
-        } finally {
-            searchInput.placeholder = 'Search Event/Project';
-            searchInput.disabled = false;
+    async function buildDynamicStatsEditor(target) {
+        const fieldsWrapper = document.getElementById('statsModalFields');
+        const modalTitle = document.getElementById('statsModalTitle');
+        if (!fieldsWrapper || !modalTitle) return;
+        fieldsWrapper.innerHTML = '';
+
+        if (target === 'turnout') {
+            modalTitle.textContent = "Enter Event Turnout Raw Headcounts";
+            fieldsWrapper.innerHTML = `
+                <label class="editor-field"><span>Workshop Headcount</span><input type="number" id="stat_turnout_w" value="${turnoutCache.workshop}" min="0"></label>
+                <label class="editor-field"><span>Community Outreach Headcount</span><input type="number" id="stat_turnout_o" value="${turnoutCache.outreach}" min="0"></label>
+                <label class="editor-field"><span>Fundraiser Headcount</span><input type="number" id="stat_turnout_f" value="${turnoutCache.fundraiser}" min="0"></label>
+            `;
+        } else if (target === 'feedback') {
+            modalTitle.textContent = "Enter Feedback Raw Headcounts";
+            fieldsWrapper.innerHTML = `
+                <label class="editor-field"><span>5 Stars Count</span><input type="number" id="stat_cnt_s5" value="40" min="0"></label>
+                <label class="editor-field"><span>4 Stars Count</span><input type="number" id="stat_cnt_s4" value="30" min="0"></label>
+                <label class="editor-field"><span>3 Stars Count</span><input type="number" id="stat_cnt_s3" value="20" min="0"></label>
+                <label class="editor-field"><span>2 Stars Count</span><input type="number" id="stat_cnt_s2" value="10" min="0"></label>
+            `;
+        } else if (target === 'demographics') {
+            modalTitle.textContent = "Enter Demographics Headcounts";
+            fieldsWrapper.innerHTML = `
+                <h4 style="font-size:14px; margin-top:4px;">Children (3-12)</h4>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_c_first" value="2" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_c_ret" value="8" min="0"></label>
+                
+                <h4 style="font-size:14px; margin-top:8px;">Teenagers (13-19)</h4>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_t_first" value="6" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_t_ret" value="4" min="0"></label>
+                
+                <h4 style="font-size:14px; margin-top:8px;">Adults (20-39)</h4>
+                <label class="editor-field"><span>First Timers Count</span><input type="number" id="stat_cnt_a_first" value="1" min="0"></label>
+                <label class="editor-field"><span>Returning Count</span><input type="number" id="stat_cnt_a_ret" value="19" min="0"></label>
+            `;
+        } else if (target === 'headcount') {
+            modalTitle.textContent = "Enter Headcount Numbers";
+            let data = null;
+            if (supabaseClient) {
+                let res = await supabaseClient.from('Event_Stats').select('*').eq('event_name', currentSearchedEvent).maybeSingle();
+                data = res.data;
+            }
+            fieldsWrapper.innerHTML = `
+                <label class="editor-field"><span>Volunteer Headcount</span><input type="number" id="stat_vol" value="${data?.volunteer_count || 130}" min="0"></label>
+                <label class="editor-field"><span>Attendee Headcount</span><input type="number" id="stat_att" value="${data?.attendee_count || 95}" min="0"></label>
+            `;
+        } else if (target === 'reach') {
+            modalTitle.textContent = "Enter Reach Source Volume Numbers";
+            fieldsWrapper.innerHTML = `
+                <label class="editor-field"><span>Word of Mouth Count</span><input type="number" id="stat_cnt_rw" value="50" min="0"></label>
+                <label class="editor-field"><span>Website Signups Count</span><input type="number" id="stat_cnt_rweb" value="10" min="0"></label>
+                <label class="editor-field"><span>Social Media Count</span><input type="number" id="stat_cnt_rs" value="40" min="0"></label>
+            `;
+        }
+
+        const modal = document.getElementById('eventStatsModal');
+        if (modal) {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    // Save Event Stats
+    const btnSaveStats = document.getElementById('saveEventStatsBtn');
+    if (btnSaveStats) {
+        btnSaveStats.addEventListener('click', async () => {
+            let updatePayload = {};
+
+            if (currentActiveStatTarget === 'turnout') {
+                const w = Math.max(0, parseInt(document.getElementById('stat_turnout_w')?.value, 10) || 0);
+                const o = Math.max(0, parseInt(document.getElementById('stat_turnout_o')?.value, 10) || 0);
+                const f = Math.max(0, parseInt(document.getElementById('stat_turnout_f')?.value, 10) || 0);
+
+                renderTurnoutGraph(w, o, f);
+
+                if (supabaseClient) {
+                    try {
+                        const updates = [
+                            { event_type: 'Workshop', headcount: w },
+                            { event_type: 'Community Outreach', headcount: o },
+                            { event_type: 'Fundraiser', headcount: f }
+                        ];
+                        await supabaseClient.from('Event_Turnout').upsert(updates, { onConflict: 'event_type' });
+                    } catch (e) {
+                        console.error("Error updating turnout database:", e);
+                    }
+                }
+                closeActiveModal('eventStatsModal');
+                return;
+            }
+
+            if (currentActiveStatTarget === 'feedback') {
+                const s5 = Math.max(0, parseInt(document.getElementById('stat_cnt_s5')?.value, 10) || 0);
+                const s4 = Math.max(0, parseInt(document.getElementById('stat_cnt_s4')?.value, 10) || 0);
+                const s3 = Math.max(0, parseInt(document.getElementById('stat_cnt_s3')?.value, 10) || 0);
+                const s2 = Math.max(0, parseInt(document.getElementById('stat_cnt_s2')?.value, 10) || 0);
+                const total = s5 + s4 + s3 + s2;
+
+                if (total > 0) {
+                    updatePayload = {
+                        stars_5: Math.round((s5 / total) * 100),
+                        stars_4: Math.round((s4 / total) * 100),
+                        stars_3: Math.round((s3 / total) * 100),
+                        stars_2: Math.round((s2 / total) * 100)
+                    };
+                }
+            } else if (currentActiveStatTarget === 'demographics') {
+                const cFirst = Math.max(0, parseInt(document.getElementById('stat_cnt_c_first')?.value, 10) || 0);
+                const cRet = Math.max(0, parseInt(document.getElementById('stat_cnt_c_ret')?.value, 10) || 0);
+                const tFirst = Math.max(0, parseInt(document.getElementById('stat_cnt_t_first')?.value, 10) || 0);
+                const tRet = Math.max(0, parseInt(document.getElementById('stat_cnt_t_ret')?.value, 10) || 0);
+                const aFirst = Math.max(0, parseInt(document.getElementById('stat_cnt_a_first')?.value, 10) || 0);
+                const aRet = Math.max(0, parseInt(document.getElementById('stat_cnt_a_ret')?.value, 10) || 0);
+
+                const cTotal = cFirst + cRet;
+                const tTotal = tFirst + tRet;
+                const aTotal = aFirst + aRet;
+                const grandTotalFirstTimers = cFirst + tFirst + aFirst;
+                const grandTotalAll = cTotal + tTotal + aTotal;
+
+                updatePayload = {
+                    child_orange: cTotal > 0 ? Math.round((cFirst / cTotal) * 100) : 0,
+                    child_yellow: cTotal > 0 ? Math.round((cRet / cTotal) * 100) : 0,
+                    teen_orange: tTotal > 0 ? Math.round((tFirst / tTotal) * 100) : 0,
+                    teen_yellow: tTotal > 0 ? Math.round((tRet / tTotal) * 100) : 0,
+                    adult_orange: aTotal > 0 ? Math.round((aFirst / aTotal) * 100) : 0,
+                    adult_yellow: aTotal > 0 ? Math.round((aRet / aTotal) * 100) : 0,
+                    first_timers: grandTotalAll > 0 ? Math.round((grandTotalFirstTimers / grandTotalAll) * 100) : 0,
+                    returning_pct: grandTotalAll > 0 ? (100 - Math.round((grandTotalFirstTimers / grandTotalAll) * 100)) : 0
+                };
+            } else if (currentActiveStatTarget === 'headcount') {
+                updatePayload = {
+                    volunteer_count: Math.max(0, parseInt(document.getElementById('stat_vol')?.value, 10) || 0),
+                    attendee_count: Math.max(0, parseInt(document.getElementById('stat_att')?.value, 10) || 0)
+                };
+            } else if (currentActiveStatTarget === 'reach') {
+                const rw = Math.max(0, parseInt(document.getElementById('stat_cnt_rw')?.value, 10) || 0);
+                const rweb = Math.max(0, parseInt(document.getElementById('stat_cnt_rweb')?.value, 10) || 0);
+                const rs = Math.max(0, parseInt(document.getElementById('stat_cnt_rs')?.value, 10) || 0);
+                const total = rw + rweb + rs;
+
+                if (total > 0) {
+                    updatePayload = {
+                        reach_word: Math.round((rw / total) * 100),
+                        reach_website: Math.round((rweb / total) * 100),
+                        reach_social: Math.round((rs / total) * 100)
+                    };
+                }
+            }
+
+            if (supabaseClient) {
+                await supabaseClient.from('Event_Stats').update(updatePayload).eq('event_name', currentSearchedEvent);
+            }
+            closeActiveModal('eventStatsModal');
+            await loadEventStatistics(currentSearchedEvent);
+        });
+    }
+
+    const btnAddTask = document.getElementById('addProjectTaskBtn');
+    const btnAddDelay = document.getElementById('addProjectDelayBtn');
+    if (btnAddTask) btnAddTask.addEventListener('click', () => openModalDirectly('taskModal'));
+    if (btnAddDelay) btnAddDelay.addEventListener('click', () => openModalDirectly('delayModal'));
+
+    function openModalDirectly(id) {
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.add('open');
+            target.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    window.closeActiveModal = function(id) {
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.remove('open');
+            target.setAttribute('aria-hidden', 'true');
         }
     };
 
-    searchInput.addEventListener('input', () => state.data && updateViewForSearch());
-    loadData();
+    const btnSaveTask = document.getElementById('saveTaskBtn');
+    if (btnSaveTask) {
+        btnSaveTask.addEventListener('click', async () => {
+            const payload = {
+                project_name: currentSearchedProject || defaultProject,
+                task_title: document.getElementById('taskTitleInput')?.value.trim() || '',
+                hours_spent: document.getElementById('taskHoursInput')?.value.trim() || '',
+                who_completed: document.getElementById('taskUserInput')?.value.trim() || '',
+                when_completed: document.getElementById('taskDateInput')?.value.trim() || ''
+            };
+            if (supabaseClient) {
+                await supabaseClient.from('Project_Tasks').insert([payload]);
+            }
+            closeActiveModal('taskModal');
+            loadProjectDataMetrics(payload.project_name);
+        });
+    }
+
+    const btnSaveDelay = document.getElementById('saveDelayBtn');
+    if (btnSaveDelay) {
+        btnSaveDelay.addEventListener('click', async () => {
+            const payload = {
+                project_name: currentSearchedProject || defaultProject,
+                delay_reason: document.getElementById('delayReasonInput')?.value.trim() || ''
+            };
+            if (supabaseClient) {
+                await supabaseClient.from('Project_Delays').insert([payload]);
+            }
+            closeActiveModal('delayModal');
+            loadProjectDataMetrics(payload.project_name);
+        });
+    }
+
+    if (searchInput) searchInput.addEventListener('input', evaluateNavigationRoute);
+
+    // Initial load sequence
+    await fetchDefaults();
+    await loadTurnoutFromDB();
+    loadOverviewGlobalMetrics();
 });

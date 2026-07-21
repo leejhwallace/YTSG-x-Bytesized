@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data</title>
     <link rel="stylesheet" href="Data.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        window.SUPABASE_URL = "https://txfditoxxdjigplckjcc.supabase.co";
+        window.SUPABASE_ANON_KEY = "sb_publishable_KzdZhuiEyoG6GEVEggJVug_1VtHc6mz";
+    </script>
+    <script defer src="Data.js"></script>
 </head>
 <body>
 <main class="schedule-page">
@@ -19,21 +25,33 @@
             <input id="dataSearch" type="search" placeholder="Search Event/Project" aria-label="Search event or project">
         </label>
     </section>
+    <p class="search-hint" id="searchHint" hidden>No event or project matches your search.</p>
 
-    <!-- ═══ VIEW 1 — OVERVIEW (default, empty search) ═══ -->
-    <section class="data-view overview-view active" data-view="overview" aria-label="Overview data">
+    <!-- VIEW 1: GENERAL OVERVIEW -->
+    <section class="data-view overview-view active" id="viewOverview">
         <div class="overview-top-row">
-            <article class="panel chart-panel donut-panel">
+            <article class="panel chart-panel donut-panel clickable-stat" data-target="turnout" style="cursor: pointer;">
                 <div class="chart-title-bar">Event types with highest turnout</div>
                 <div class="donut-wrap">
-                    <div class="overview-donut" id="eventTypeDonut"></div>
-                    <div class="donut-legend" id="eventTypeLegend"></div>
+                    <div class="overview-donut" id="overviewDonutChart"></div>
+                    <div class="donut-legend" id="overviewDonutLegend">
+                        <p class="legend-workshop" id="lblWorkshop">Workshop ~ 0%</p>
+                        <p class="legend-outreach" id="lblOutreach">Community Outreach ~ 0%</p>
+                        <p class="legend-fundraiser" id="lblFundraiser">Fundraiser ~ 0%</p>
+                    </div>
                 </div>
             </article>
             <article class="panel chart-panel bar-panel">
                 <div class="chart-title-bar">Month-on-month event growth</div>
                 <div class="bar-chart-wrap">
-                    <div class="bar-chart" id="eventGrowthBars"></div>
+                    <div class="bar-chart" id="monthGrowthBarChart">
+                        <div class="bar" style="height:30%"></div><div class="bar" style="height:50%"></div>
+                        <div class="bar" style="height:35%"></div><div class="bar" style="height:60%"></div>
+                        <div class="bar" style="height:45%"></div><div class="bar" style="height:75%"></div>
+                        <div class="bar" style="height:55%"></div><div class="bar" style="height:80%"></div>
+                        <div class="bar" style="height:65%"></div><div class="bar" style="height:90%"></div>
+                        <div class="bar" style="height:70%"></div><div class="bar" style="height:45%"></div>
+                    </div>
                     <div class="bar-chart-axis"></div>
                 </div>
             </article>
@@ -42,140 +60,200 @@
             <article class="panel overview-table-panel">
                 <table class="overview-table">
                     <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>No. of participants</th>
-                            <th>Event type</th>
-                        </tr>
+                        <tr><th>Event</th><th>No. of participants</th><th>Event type</th></tr>
                     </thead>
-                    <tbody id="overviewEvents"></tbody>
+                    <tbody id="eventTableBody">
+                        <!-- Loaded dynamically from Supabase -->
+                    </tbody>
                 </table>
             </article>
             <article class="panel volunteer-panel">
                 <table class="volunteer-table">
                     <thead>
-                        <tr>
-                            <th>Most active volunteer</th>
-                            <th>Number of hrs</th>
-                        </tr>
+                        <tr><th>Most active volunteer</th><th>Number of hrs</th></tr>
                     </thead>
-                    <tbody id="overviewVolunteers"></tbody>
+                    <tbody id="volunteerTableBody">
+                        <!-- Loaded dynamically from Supabase -->
+                    </tbody>
                 </table>
             </article>
         </div>
     </section>
 
-    <!-- ═══ VIEW 2 — PROJECT VIEW ═══ -->
-    <section class="data-view project-view" data-view="project" aria-label="Project data">
-        <article class="panel project-hours">
-            <button class="edit-button" type="button" aria-label="Edit total hours spent">✏️</button>
-            <div class="project-hours-header">
-                <h2 id="projectTotalHours">0 min</h2>
-                <p class="subtitle">Total amount spent</p>
-            </div>
-            <table class="hours-table">
-                <thead>
-                    <tr>
-                        <th>Task</th>
-                        <th>Hours Spent</th>
-                        <th>Who Completed</th>
-                        <th>When Completed</th>
-                    </tr>
-                </thead>
-                <tbody id="projectTasks"></tbody>
-            </table>
-        </article>
-        <article class="panel project-reasons">
-            <button class="edit-button" type="button" aria-label="Edit reasons for delays">✏️</button>
-            <h2>Reasons for delays</h2>
-            <p class="project-delay-reason" id="projectDelayReason"></p>
-        </article>
+    <!-- VIEW 2: PROJECT VIEW -->
+    <section class="data-view project-view" id="viewProject">
+        <header class="entity-info" id="projectInfoHeader" hidden>
+            <h2 id="projectInfoName"></h2>
+            <p class="entity-desc" id="projectInfoDesc"></p>
+            <p class="entity-meta" id="projectInfoMeta"></p>
+        </header>
+        <div class="view-body project-body">
+            <article class="panel project-hours clickable-stat" data-target="project-tasks">
+                <button class="edit-button" id="addProjectTaskBtn" type="button"> </button>
+                <div class="project-hours-header">
+                    <h2 id="projectHoursTotal">11 Hours 10min</h2>
+                    <p class="subtitle">Total amount spent</p>
+                </div>
+                <table class="hours-table">
+                    <thead>
+                        <tr><th>Task</th><th>Hours Spent</th><th>Who Completed</th><th>When Completed</th></tr>
+                    </thead>
+                    <tbody id="projectTaskBody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </article>
+            <article class="panel project-reasons clickable-stat" data-target="project-delays">
+                <button class="edit-button" id="addProjectDelayBtn" type="button"> </button>
+                <h2>Reasons for delays</h2>
+                <ul class="delay-list" id="projectDelayBody">
+                    <!-- Delay items append here -->
+                </ul>
+            </article>
+        </div>
     </section>
 
-    <!-- ═══ VIEW 3 — EVENT VIEW ═══ -->
-    <section class="data-view event-view" data-view="event" aria-label="Event data">
-        <div class="event-left-col">
-            <article class="panel feedback-panel">
-                <div class="feedback-title-bar">Feedback ratings</div>
-                <div class="feedback-content">
-                    <div class="rating-donut" id="ratingDonut"></div>
-                    <div class="rating-labels" id="ratingLabels"></div>
+    <!-- VIEW 3: EVENT SEARCH VIEW -->
+    <section class="data-view event-view" id="viewEvent">
+        <header class="entity-info" id="eventInfoHeader" hidden>
+            <h2 id="eventInfoName"></h2>
+            <p class="entity-desc" id="eventInfoDesc"></p>
+            <p class="entity-meta" id="eventInfoMeta"></p>
+        </header>
+        <div class="view-body event-body">
+            <div class="event-left-col">
+                <article class="panel feedback-panel clickable-stat" data-target="feedback">
+                    <div class="feedback-title-bar">Feedback ratings</div>
+                    <div class="feedback-content">
+                        <div class="rating-donut" id="eventRatingDonut"></div>
+                        <div class="rating-labels" id="eventRatingLabels">
+                            <p class="rating-five">5 Stars ~ 40%</p>
+                            <p class="rating-four">4 Stars ~ 30%</p>
+                            <p class="rating-three">3 Stars ~ 20%</p>
+                            <p class="rating-two">2 Stars ~ 10%</p>
+                        </div>
+                    </div>
+                </article>
+                <article class="panel demographic-panel clickable-stat" data-target="demographics">
+                    <div class="demo-title-bar">Demographic info</div>
+                    <div class="demo-content">
+                        <div class="demographic-bars">
+                            <div class="demo-col">
+                                <div class="demo-group children" id="barChild"><span class="demo-seg seg-orange">20%</span><span class="demo-seg seg-yellow">80%</span></div>
+                                <span class="demo-label">children (3-12)</span>
+                            </div>
+                            <div class="demo-col">
+                                <div class="demo-group teenagers" id="barTeen"><span class="demo-seg seg-orange">60%</span><span class="demo-seg seg-yellow">40%</span></div>
+                                <span class="demo-label">teenagers (13-19)</span>
+                            </div>
+                            <div class="demo-col">
+                                <div class="demo-group adults" id="barAdult"><span class="demo-seg seg-orange">5%</span><span class="demo-seg seg-yellow">95%</span></div>
+                                <span class="demo-label">adults (20-39)</span>
+                            </div>
+                        </div>
+                        <div class="demo-key-row" id="demoKeyLabels">
+                            <p class="demo-key first-timer">First timers ~ 28.33%</p>
+                            <p class="demo-key returning">Returning ~ 71.67%</p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <article class="panel headcount-panel clickable-stat" data-target="headcount">
+                <h2>Volunteer headcount vs attendee headcount</h2>
+                <div class="headcount-table">
+                    <div class="headcount-row">
+                        <span class="hc-label">Volunteer headcount</span>
+                        <strong class="hc-num" id="lblVolHeadcount">130</strong>
+                    </div>
+                    <div class="headcount-row">
+                        <span class="hc-label">attendee headcount</span>
+                        <strong class="hc-num" id="lblAttHeadcount">95</strong>
+                    </div>
+                    <div class="headcount-row total-row">
+                        <span class="hc-label">Difference</span>
+                        <strong class="hc-num" id="lblDiffHeadcount">35</strong>
+                    </div>
                 </div>
             </article>
-            <article class="panel demographic-panel">
-                <div class="demo-title-bar">Demographic info</div>
-                <div class="demo-content">
-                    <div class="demographic-bars" id="demographicBars"></div>
-                    <div class="demo-key-row" id="demographicKey"></div>
+            <article class="panel reach-panel clickable-stat" data-target="reach">
+                <h2>Reach metrics</h2>
+                <div class="reach-content">
+                    <div class="stacked-bar">
+                        <span class="reach-word" id="barReachWord" style="height: 50%;"></span>
+                        <span class="reach-website" id="barReachWeb" style="height: 10%;"></span>
+                        <span class="reach-social" id="barReachSocial" style="height: 40%;"></span>
+                    </div>
+                    <div class="reach-labels" id="reachLabelsContainer">
+                        <p class="word">Word of Mouth ~ 50%</p>
+                        <p class="website">Website ~ 10%</p>
+                        <p class="social">Social Media ~ 40%</p>
+                    </div>
                 </div>
             </article>
         </div>
-
-        <article class="panel headcount-panel">
-            <h2>Volunteer headcount vs attendee headcount</h2>
-            <div class="headcount-table">
-                <div class="headcount-row">
-                    <span class="hc-label">Volunteer headcount</span>
-                    <strong class="hc-num" id="volunteerHeadcount">0</strong>
-                    <strong class="hc-pct" id="volunteerHeadcountPct">0%</strong>
-                </div>
-                <div class="headcount-row">
-                    <span class="hc-label">attendee headcount</span>
-                    <strong class="hc-num" id="attendeeHeadcount">0</strong>
-                    <strong class="hc-pct" id="attendeeHeadcountPct">0%</strong>
-                </div>
-                <div class="headcount-row">
-                    <span class="hc-label">Difference</span>
-                    <strong class="hc-num" id="headcountDifference">0</strong>
-                    <strong class="hc-pct" id="headcountDifferencePct">0%</strong>
-                </div>
-            </div>
-        </article>
-
-        <article class="panel reach-panel">
-            <h2>Reach metrics</h2>
-            <div class="reach-content">
-                <div class="stacked-bar" aria-hidden="true">
-                    <span class="reach-word" id="reachWord"></span>
-                    <span class="reach-website" id="reachWebsite"></span>
-                    <span class="reach-social" id="reachSocial"></span>
-                </div>
-                <div class="reach-labels">
-                    <p class="word" id="reachWordLabel"></p>
-                    <p class="website" id="reachWebsiteLabel"></p>
-                    <p class="social" id="reachSocialLabel"></p>
-                </div>
-            </div>
-        </article>
     </section>
 
-    <!-- ═══ NO RESULTS STATE ═══ -->
-    <section class="data-view no-results-view" data-view="none" aria-label="No results">
-        <div class="no-results-content">
-            <div class="no-results-icon">🔍</div>
-            <h2>No results found</h2>
-            <p id="noResultsMessage">Try searching for a valid event or project name.</p>
+    <!-- FORM MODALS FOR SUBMISSIONS -->
+    <section class="editor-sheet" id="taskModal" aria-hidden="true">
+        <div class="editor-header">
+            <button class="editor-close" type="button" onclick="closeActiveModal('taskModal')">&#10005;</button>
+            <div class="editor-column-title" style="color: #000;">Add Project Task Entry</div>
+            <button class="editor-save" id="saveTaskBtn">&#10003;</button>
+        </div>
+        <div class="editor-content">
+            <div class="editor-column">
+                <label class="editor-field"><span>Task Title</span><input type="text" id="taskTitleInput" placeholder="e.g. Planning"></label>
+                <label class="editor-field"><span>Hours Spent</span><input type="text" id="taskHoursInput" placeholder="e.g. 5 hours 7 min"></label>
+                <label class="editor-field"><span>Who Completed</span><input type="text" id="taskUserInput" placeholder="e.g. John Tan"></label>
+                <label class="editor-field"><span>When Completed</span><input type="text" id="taskDateInput" placeholder="e.g. 12/3/26"></label>
+            </div>
         </div>
     </section>
 
+    <section class="editor-sheet" id="delayModal" aria-hidden="true">
+        <div class="editor-header">
+            <button class="editor-close" type="button" onclick="closeActiveModal('delayModal')">&#10005;</button>
+            <div class="editor-column-title" style="color: #000;">Log Delay Reason</div>
+            <button class="editor-save" id="saveDelayBtn">&#10003;</button>
+        </div>
+        <div class="editor-content">
+            <div class="editor-column">
+                <label class="editor-field"><span>Reason for Delay</span><input type="text" id="delayReasonInput" placeholder="Enter reason description..."></label>
+            </div>
+        </div>
+    </section>
+
+    <section class="editor-sheet" id="eventStatsModal" aria-hidden="true">
+        <div class="editor-header">
+            <button class="editor-close" type="button" onclick="closeActiveModal('eventStatsModal')">&#10005;</button>
+            <div class="editor-column-title" id="statsModalTitle" style="color: #000;">Modify Statistics</div>
+            <button class="editor-save" id="saveEventStatsBtn">&#10003;</button>
+        </div>
+        <div class="editor-content">
+            <div class="editor-column" id="statsModalFields">
+                <!-- Fields append here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- NAVIGATION FOOTER -->
     <nav class="bottom-nav" aria-label="Main navigation">
-        <a href="../page4/Schedule.html" class="nav-item">
-            <span class="nav-icon nav-calendar"></span>
-            <span>Schedule</span>
-        </a>
-        <a href="../page5/Data.html" class="nav-item active">
-            <img class="nav-icon nav-image nav-data" src="../images/data-icon-white.png" alt="Data">
-            <span>Data</span>
-        </a>
-        <a href="../page6/Settings.html" class="nav-item">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-            <span>Settings</span>
-        </a>
-    </nav>
+            <a href="../page4/Schedule.html" class="nav-item">
+                <span class="nav-icon nav-calendar"></span>
+                <span>Schedule</span>
+            </a>
+            <a href="../page5/Data.html" class="nav-item active">
+                <img class="nav-icon nav-image nav-data" src="../images/data-icon-white.png" alt="Data">
+                <span>Data</span>
+            </a>
+            <a href="../page6/Settings.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />                                  
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
 </main>
-<script src="Data.js"></script>
 </body>
 </html>

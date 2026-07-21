@@ -136,10 +136,6 @@ body {
     flex-shrink: 0;
 }
 
-.logout-btn:hover {
-    background: var(--danger);
-    color: #fff;
-}
 
 .logout-btn:active {
     transform: scale(0.96);
@@ -173,7 +169,6 @@ body {
     font-weight: 700;
     outline: none;
     padding: 0 16px;
-    transition: background 0.15s, box-shadow 0.15s;
     appearance: none;
     -webkit-appearance: none;
 }
@@ -222,7 +217,7 @@ body {
     transition: color 0.15s;
 }
 
-.eye-btn:hover { color: #fff; }
+
 .eye-btn svg { width: 15px; height: 15px; }
 
 /* Save button */
@@ -250,7 +245,7 @@ body {
     cursor: not-allowed;
 }
 
-.save-btn:hover:not(:disabled) { background: #e0a030; }
+
 .save-btn:active:not(:disabled) { transform: scale(0.96); }
 
 /* Toast Notification Styles */
