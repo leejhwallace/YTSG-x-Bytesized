@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
-import cloudflareWorkersAdapter from '@as-integrations/cloudflare-workers';
-import bcrypt from 'bcryptjs'; // 👈 Swapped back to bcryptjs
+import * as cfAdapter from '@as-integrations/cloudflare-workers';
+import bcrypt from 'bcryptjs';
 
 
 
@@ -102,4 +102,10 @@ app.post('/api/login', async (req, res) => {
 
 export default {
     fetch: cloudflareWorkersAdapter(app)
+};
+
+
+
+export default {
+    fetch: cfAdapter.cloudflareWorkersAdapter(app)
 };
