@@ -2,13 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bytesized",
   "compatibility_date": "2026-07-21",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "directory": "public"
-  },
+  "main": "server.js", 
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "assets": {
+    "directory": "public" 
+  }
 }
