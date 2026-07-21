@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
+
 const cors = require('cors');
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
@@ -22,8 +22,6 @@ app.post('/api/signup', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Sign up user with Supabase Auth
         const { data: signData, error: signError } = await supabaseClient.auth.signUp({
